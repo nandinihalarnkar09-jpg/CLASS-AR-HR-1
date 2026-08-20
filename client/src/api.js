@@ -1,3 +1,5 @@
+import { demoRequest, demoActive, enableDemo } from "./demoStore";
+
 const USER_KEY = "meridian-ats-user-id";
 
 export function getUserId() {
@@ -8,27 +10,51 @@ export function setUserId(id) {
   localStorage.setItem(USER_KEY, String(id));
 }
 
+export function isDemoMode() {
+  return demoActive;
+}
+
 async function request(path, options = {}) {
   const headers = {
     ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     "x-user-id": String(getUserId()),
     ...options.headers,
   };
-  const res = await fetch(path, { ...options, headers });
-  const text = await res.text();
-  let data = null;
+
+  if (demoActive) {
+    return demoRequest(path, options, getUserId());
+  }
+
   try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
+    const res = await fetch(path, { ...options, headers });
+    const text = await res.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = text;
+    }
+    if (res.status === 404 || (res.ok && typeof data === "string" && data.includes("<!doctype"))) {
+      enableDemo();
+      return demoRequest(path, options, getUserId());
+    }
+    if (!res.ok) {
+      const apiJson = data && typeof data === "object";
+      if (!apiJson) {
+        enableDemo();
+        return demoRequest(path, options, getUserId());
+      }
+      const err = new Error(data?.error || res.statusText);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  } catch (e) {
+    if (e.status && e.status !== 404) throw e;
+    enableDemo();
+    return demoRequest(path, options, getUserId());
   }
-  if (!res.ok) {
-    const err = new Error(data?.error || res.statusText);
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-  return data;
 }
 
 export const api = {

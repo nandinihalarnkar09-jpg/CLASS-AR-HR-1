@@ -1,6 +1,6 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api, getUserId, setUserId } from "./api";
+import { api, getUserId, setUserId, isDemoMode } from "./api";
 import Dashboard from "./pages/Dashboard.jsx";
 import Jobs from "./pages/Jobs.jsx";
 import Pipeline from "./pages/Pipeline.jsx";
@@ -10,10 +10,14 @@ import Audit from "./pages/Audit.jsx";
 
 export default function App() {
   const [meta, setMeta] = useState(null);
+  const [bootError, setBootError] = useState("");
   const [userId, setUid] = useState(getUserId());
 
   useEffect(() => {
-    api.meta().then(setMeta).catch(console.error);
+    api
+      .meta()
+      .then(setMeta)
+      .catch((e) => setBootError(e.message || "Could not start"));
   }, [userId]);
 
   function switchUser(id) {
@@ -22,6 +26,17 @@ export default function App() {
     window.location.reload();
   }
 
+  if (bootError) {
+    return (
+      <div className="main">
+        <h1>Meridian ATS did not start</h1>
+        <p>{bootError}</p>
+        <p>On your computer run these in a terminal from the project folder, then open <strong>http://localhost:5173</strong>:</p>
+        <pre>npm run install:all{"\n"}npm run dev</pre>
+        <p>Keep that terminal open. GitHub is only the source code — it is not the live website.</p>
+      </div>
+    );
+  }
   if (!meta) return <div className="main">Loading Meridian ATS…</div>;
 
   return (
@@ -30,7 +45,7 @@ export default function App() {
         <div className="logo">
           <div className="logo-mark">M</div>
           <div className="brand-type">Meridian ATS</div>
-          <small>Talent · DPDP v1</small>
+          <small>Talent · DPDP v1{isDemoMode() ? " · browser demo" : ""}</small>
         </div>
         <nav className="nav">
           <NavLink to="/">Dashboard</NavLink>
