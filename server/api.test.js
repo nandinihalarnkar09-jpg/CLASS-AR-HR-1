@@ -127,3 +127,51 @@ test("hiring manager cannot create jobs", async () => {
   const res = await req("POST", "/api/jobs", { title: "X" }, 6);
   assert.equal(res.status, 403);
 });
+
+test("recruiter and candidate can log in", async () => {
+  const staff = await req("POST", "/api/auth/login", {
+    portal: "staff",
+    email: "arjun.mehta@meridian.tech",
+    password: "Meridian@2026",
+  });
+  assert.equal(staff.status, 200);
+  assert.equal(staff.json.type, "staff");
+  assert.equal(staff.json.user.role, "recruiter");
+
+  const cand = await req("POST", "/api/auth/login", {
+    portal: "candidate",
+    email: "aditya.menon@example.com",
+    password: "Welcome@123",
+  });
+  assert.equal(cand.status, 200);
+  assert.equal(cand.json.type, "candidate");
+
+  const bad = await req("POST", "/api/auth/login", {
+    portal: "staff",
+    email: "arjun.mehta@meridian.tech",
+    password: "wrong",
+  });
+  assert.equal(bad.status, 401);
+});
+
+test("candidate cannot open recruiter APIs", async () => {
+  const res = await new Promise((resolve, reject) => {
+    const r = http.request(
+      {
+        hostname: "127.0.0.1",
+        port,
+        path: "/api/jobs",
+        method: "GET",
+        headers: { "x-auth-role": "candidate", "x-candidate-id": "1" },
+      },
+      (res) => {
+        let buf = "";
+        res.on("data", (c) => (buf += c));
+        res.on("end", () => resolve({ status: res.statusCode, json: JSON.parse(buf || "{}") }));
+      }
+    );
+    r.on("error", reject);
+    r.end();
+  });
+  assert.equal(res.status, 403);
+});

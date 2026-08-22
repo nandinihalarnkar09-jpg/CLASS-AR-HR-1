@@ -28,10 +28,10 @@ function now() {
 
 function seed() {
   const users = [
-    { id: 1, name: "Priya Nair", email: "priya.nair@meridian.tech", role: "ta_head" },
-    { id: 2, name: "Arjun Mehta", email: "arjun.mehta@meridian.tech", role: "recruiter" },
-    { id: 3, name: "Sneha Iyer", email: "sneha.iyer@meridian.tech", role: "recruiter" },
-    { id: 6, name: "Vikram Rao", email: "vikram.rao@meridian.tech", role: "hiring_manager" },
+    { id: 1, name: "Priya Nair", email: "priya.nair@meridian.tech", role: "ta_head", password: "Meridian@2026" },
+    { id: 2, name: "Arjun Mehta", email: "arjun.mehta@meridian.tech", role: "recruiter", password: "Meridian@2026" },
+    { id: 3, name: "Sneha Iyer", email: "sneha.iyer@meridian.tech", role: "recruiter", password: "Meridian@2026" },
+    { id: 6, name: "Vikram Rao", email: "vikram.rao@meridian.tech", role: "hiring_manager", password: "Meridian@2026" },
   ];
   const clients = [
     { id: 1, name: "HDFC Bank" },
@@ -55,10 +55,10 @@ function seed() {
     { id: 5, title: "DevOps Engineer", client_id: 4, project_id: 5, skills_required: "Kubernetes, Terraform, Jenkins, AWS", exp_min_years: 4, exp_max_years: 7, ctc_min_lpa: 18, ctc_max_lpa: 26, location: "Mumbai", target_closure_date: "2026-08-22", recruiter_id: 2, status: "open", client_name: "Reliance Jio", project_name: "5G OSS Support", project_start: "2026-08-25", billing_rate_inr: 175000, recruiter_name: "Arjun Mehta", created_at: "2026-07-10 09:00:00" },
   ];
   const candidates = [
-    { id: 1, name: "Aditya Menon", phone: "9876500001", email: "aditya.menon@example.com", current_company: "Wipro", current_ctc_lpa: 16, expected_ctc_lpa: 22, notice_period_days: 90, total_experience_years: 6.5, skills: "Java, Spring Boot, React", source_type: "naukri", source_detail: "Naukri search", consultancy_id: null, referred_by: null, consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 2, name: "Nisha Verma", phone: "9876500002", email: "nisha.verma@example.com", current_company: "TCS", current_ctc_lpa: 14, expected_ctc_lpa: 18, notice_period_days: 30, total_experience_years: 4.2, skills: "React, TypeScript, Redux", source_type: "linkedin", source_detail: "InMail", consultancy_id: null, referred_by: null, consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 3, name: "Farhan Qureshi", phone: "9876500003", email: "farhan.q@example.com", current_company: "Capgemini", current_ctc_lpa: 22, expected_ctc_lpa: 30, notice_period_days: 60, total_experience_years: 8, skills: "Python, Spark, Kafka, AWS", source_type: "consultancy", source_detail: "Adecco India", consultancy_id: 1, referred_by: null, consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 4, name: "Kavya Reddy", phone: "9876500004", email: "kavya.reddy@example.com", current_company: "Accenture", current_ctc_lpa: 18, expected_ctc_lpa: 24, notice_period_days: 15, total_experience_years: 5.5, skills: "Java, Spring, Microservices", source_type: "referral", source_detail: "Employee referral", consultancy_id: null, referred_by: "Vikram Rao", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
+    { id: 1, name: "Aditya Menon", phone: "9876500001", email: "aditya.menon@example.com", current_company: "Wipro", current_ctc_lpa: 16, expected_ctc_lpa: 22, notice_period_days: 90, total_experience_years: 6.5, skills: "Java, Spring Boot, React", source_type: "naukri", source_detail: "Naukri search", consultancy_id: null, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
+    { id: 2, name: "Nisha Verma", phone: "9876500002", email: "nisha.verma@example.com", current_company: "TCS", current_ctc_lpa: 14, expected_ctc_lpa: 18, notice_period_days: 30, total_experience_years: 4.2, skills: "React, TypeScript, Redux", source_type: "linkedin", source_detail: "InMail", consultancy_id: null, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
+    { id: 3, name: "Farhan Qureshi", phone: "9876500003", email: "farhan.q@example.com", current_company: "Capgemini", current_ctc_lpa: 22, expected_ctc_lpa: 30, notice_period_days: 60, total_experience_years: 8, skills: "Python, Spark, Kafka, AWS", source_type: "consultancy", source_detail: "Adecco India", consultancy_id: 1, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
+    { id: 4, name: "Kavya Reddy", phone: "9876500004", email: "kavya.reddy@example.com", current_company: "Accenture", current_ctc_lpa: 18, expected_ctc_lpa: 24, notice_period_days: 15, total_experience_years: 5.5, skills: "Java, Spring, Microservices", source_type: "referral", source_detail: "Employee referral", consultancy_id: null, referred_by: "Vikram Rao", portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
   ];
   const applications = [
     { id: 1, candidate_id: 1, job_id: 1, stage: "client_round", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: null, joining_date: null, updated_at: now() },
@@ -95,7 +95,7 @@ function seed() {
   };
 }
 
-const KEY = "meridian-ats-demo-v1";
+const KEY = "meridian-ats-demo-v2";
 
 function load() {
   try {
@@ -151,10 +151,10 @@ export function enableDemo() {
   demoActive = true;
 }
 
-export async function demoRequest(path, options = {}, userId = 2) {
+export async function demoRequest(path, options = {}, userId = 2, session = null) {
   enableDemo();
   const s = load();
-  const u = user(s, userId);
+  const u = user(s, session?.type === "staff" ? session.user.id : userId);
   const method = (options.method || "GET").toUpperCase();
   const url = new URL(path, "http://local.demo");
   const p = url.pathname;
@@ -172,6 +172,54 @@ export async function demoRequest(path, options = {}, userId = 2) {
     }
     return data;
   };
+
+  if (p === "/api/auth/demo-accounts") {
+    return json({
+      staffPassword: "Meridian@2026",
+      candidatePassword: "Welcome@123",
+      staff: s.users.map(({ password, ...rest }) => rest),
+      candidates: s.candidates.map((c) => ({ name: c.name, email: c.email, phone: c.phone })),
+    });
+  }
+  if (p === "/api/auth/login" && method === "POST") {
+    const email = String(body.email || "").toLowerCase();
+    if (body.portal === "candidate") {
+      const c = s.candidates.find((x) => x.email.toLowerCase() === email);
+      if (!c || c.portal_password !== body.password) return json({ error: "Invalid candidate email or password" }, 401);
+      return json({ type: "candidate", candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone } });
+    }
+    const staff = s.users.find((x) => x.email.toLowerCase() === email);
+    if (!staff || staff.password !== body.password) return json({ error: "Invalid recruiter email or password" }, 401);
+    return json({ type: "staff", user: { id: staff.id, name: staff.name, email: staff.email, role: staff.role } });
+  }
+  if (p === "/api/portal/jobs") {
+    const cid = session?.candidate?.id;
+    const applied = new Set(s.applications.filter((a) => a.candidate_id === cid).map((a) => a.job_id));
+    return json(s.jobs.filter((j) => j.status === "open").map((j) => ({
+      id: j.id, title: j.title, skills_required: j.skills_required, location: j.location,
+      exp_min_years: j.exp_min_years, exp_max_years: j.exp_max_years, client_name: j.client_name,
+      applied: applied.has(j.id),
+    })));
+  }
+  if (p === "/api/portal/me") {
+    const cid = session?.candidate?.id;
+    const c = s.candidates.find((x) => x.id === cid);
+    if (!c) return json({ error: "Please log in as a candidate" }, 401);
+    const STAGE_LABELS_LOCAL = STAGE_LABELS;
+    const applications = s.applications.filter((a) => a.candidate_id === cid).map((a) => {
+      const j = s.jobs.find((job) => job.id === a.job_id);
+      return { ...a, job_title: j?.title, location: j?.location, client_name: j?.client_name, stage_label: STAGE_LABELS_LOCAL[a.stage] };
+    });
+    return json({ candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone, skills: c.skills, notice_period_days: c.notice_period_days }, applications, stageLabels: STAGE_LABELS });
+  }
+  if (p === "/api/portal/apply" && method === "POST") {
+    const cid = session?.candidate?.id;
+    const existing = s.applications.find((a) => a.candidate_id === cid && a.job_id === body.job_id);
+    if (existing) return json({ error: "You have already applied to this role" }, 409);
+    const id = ++s.ids.app;
+    s.applications.push({ id, candidate_id: cid, job_id: body.job_id, stage: "applied", outcome: "active" });
+    return json({ id }, 201);
+  }
 
   s.audit.unshift({
     id: s.audit.length + 1,

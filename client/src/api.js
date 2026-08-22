@@ -1,13 +1,32 @@
 import { demoRequest, demoActive, enableDemo } from "./demoStore";
 
-const USER_KEY = "meridian-ats-user-id";
+const SESSION_KEY = "meridian-ats-session";
+
+export function getSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setSession(session) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+export function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
 
 export function getUserId() {
-  return Number(localStorage.getItem(USER_KEY) || 2);
+  const s = getSession();
+  if (s?.type === "staff") return s.user.id;
+  return Number(localStorage.getItem("meridian-ats-user-id") || 2);
 }
 
 export function setUserId(id) {
-  localStorage.setItem(USER_KEY, String(id));
+  localStorage.setItem("meridian-ats-user-id", String(id));
 }
 
 export function isDemoMode() {
@@ -15,14 +34,20 @@ export function isDemoMode() {
 }
 
 async function request(path, options = {}) {
+  const session = getSession();
   const headers = {
     ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     "x-user-id": String(getUserId()),
     ...options.headers,
   };
+  if (session?.type === "staff") headers["x-auth-role"] = "staff";
+  if (session?.type === "candidate") {
+    headers["x-auth-role"] = "candidate";
+    headers["x-candidate-id"] = String(session.candidate.id);
+  }
 
   if (demoActive) {
-    return demoRequest(path, options, getUserId());
+    return demoRequest(path, options, getUserId(), session);
   }
 
   try {
@@ -36,13 +61,13 @@ async function request(path, options = {}) {
     }
     if (res.status === 404 || (res.ok && typeof data === "string" && data.includes("<!doctype"))) {
       enableDemo();
-      return demoRequest(path, options, getUserId());
+      return demoRequest(path, options, getUserId(), session);
     }
     if (!res.ok) {
       const apiJson = data && typeof data === "object";
       if (!apiJson) {
         enableDemo();
-        return demoRequest(path, options, getUserId());
+        return demoRequest(path, options, getUserId(), session);
       }
       const err = new Error(data?.error || res.statusText);
       err.status = res.status;
@@ -53,11 +78,16 @@ async function request(path, options = {}) {
   } catch (e) {
     if (e.status && e.status !== 404) throw e;
     enableDemo();
-    return demoRequest(path, options, getUserId());
+    return demoRequest(path, options, getUserId(), session);
   }
 }
 
 export const api = {
+  demoAccounts: () => request("/api/auth/demo-accounts"),
+  login: (body) => request("/api/auth/login", { method: "POST", body: JSON.stringify(body) }),
+  portalMe: () => request("/api/portal/me"),
+  portalJobs: () => request("/api/portal/jobs"),
+  portalApply: (job_id) => request("/api/portal/apply", { method: "POST", body: JSON.stringify({ job_id }) }),
   meta: () => request("/api/meta"),
   dashboard: () => request("/api/dashboard"),
   jobs: () => request("/api/jobs"),

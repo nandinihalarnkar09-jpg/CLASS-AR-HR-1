@@ -37,14 +37,48 @@
     .tag.high { background: #f4d9d6; color: var(--danger); }
     .meta { color: var(--muted); font-size: 12px; }
     .chip { font-size: 12px; background: #ece5d6; border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; }
+    .login-shell { min-height: 100vh; display: grid; grid-template-columns: 1.1fr .9fr; }
+    .login-hero { background: linear-gradient(180deg, var(--ink), var(--navy)); color: #f7f1e6; padding: 64px 48px; }
+    .login-panel { padding: 48px 36px; }
+    .portal-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 18px; }
+    .portal-toggle button { border: 1px solid var(--line); background: #fff; padding: 12px; border-radius: 10px; cursor: pointer; font: inherit; }
+    .portal-toggle button.on { background: var(--ink); color: #fff; }
+    label.field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+    input { border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px; font: inherit; }
+    .btn { background: var(--ink); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 16px; font: inherit; }
+    .hint { font-size: 13px; color: var(--muted); margin-top: 18px; }
+    #app { display: none; }
+    #cand { display: none; }
     @media (max-width: 900px) {
       .app { grid-template-columns: 1fr; }
       .kpis { grid-template-columns: 1fr 1fr; }
+      .login-shell { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div id="login" class="login-shell">
+    <div class="login-hero">
+      <div class="mark">M</div>
+      <h1>Meridian ATS</h1>
+      <p>Recruiters run client hiring. Candidates check application status.</p>
+    </div>
+    <div class="login-panel">
+      <p class="eyebrow">Sign in</p>
+      <h2 style="margin-top:0">Choose your portal</h2>
+      <div class="portal-toggle">
+        <button type="button" id="tabStaff" class="on">Recruiter</button>
+        <button type="button" id="tabCand">Candidate</button>
+      </div>
+      <label class="field">Email <input id="email" type="email" value="arjun.mehta@meridian.tech" /></label>
+      <label class="field">Password <input id="password" type="password" value="Meridian@2026" /></label>
+      <p id="err" style="color:#9b3a32;font-size:13px"></p>
+      <button class="btn" id="go">Enter</button>
+      <p class="hint" id="hint">Recruiter demo: arjun.mehta@meridian.tech / Meridian@2026<br />TA Head: priya.nair@meridian.tech / Meridian@2026</p>
+    </div>
+  </div>
+
+  <div id="app" class="app">
     <aside class="sidebar">
       <div>
         <div class="mark">M</div>
@@ -57,7 +91,8 @@
         <a data-page="pipe">Pipeline</a>
         <a data-page="cands">Candidates</a>
       </nav>
-      <p class="meta" style="color:#cbbfae;margin-top:auto">Meridian Technologies Pvt. Ltd.<br />Open this file in any browser.</p>
+      <p class="meta" style="color:#cbbfae;margin-top:auto">Meridian Technologies Pvt. Ltd.</p>
+      <p><a href="#" id="logoutStaff" style="color:#eadfce">Log out</a></p>
     </aside>
     <main class="main">
       <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -126,11 +161,79 @@
       </section>
     </main>
   </div>
+
+  <div id="cand" class="app">
+    <aside class="sidebar">
+      <div>
+        <div class="mark">M</div>
+        <div class="brand">Meridian ATS</div>
+        <small>Candidate portal</small>
+      </div>
+      <p class="meta" style="color:#cbbfae;margin-top:auto"><a href="#" id="logoutCand" style="color:#eadfce">Log out</a></p>
+    </aside>
+    <main class="main">
+      <p class="eyebrow">Candidate portal</p>
+      <h1 id="candHello">Hello</h1>
+      <div class="card">
+        <h2>My applications</h2>
+        <table>
+          <thead><tr><th>Role</th><th>Client</th><th>Stage</th></tr></thead>
+          <tbody id="candApps"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
   <script>
+    const staff = {
+      "arjun.mehta@meridian.tech": { name: "Arjun Mehta", role: "recruiter", password: "Meridian@2026" },
+      "priya.nair@meridian.tech": { name: "Priya Nair", role: "ta_head", password: "Meridian@2026" },
+      "sneha.iyer@meridian.tech": { name: "Sneha Iyer", role: "recruiter", password: "Meridian@2026" },
+      "vikram.rao@meridian.tech": { name: "Vikram Rao", role: "hiring_manager", password: "Meridian@2026" }
+    };
+    const cands = {
+      "aditya.menon@example.com": { name: "Aditya Menon", password: "Welcome@123", apps: [["Java Full Stack Engineer", "HDFC Bank", "Client round"], ["DevOps Engineer", "Reliance Jio", "Dropped out"]] },
+      "nisha.verma@example.com": { name: "Nisha Verma", password: "Welcome@123", apps: [["React Frontend Developer", "HDFC Bank", "Internal interview"]] },
+      "kavya.reddy@example.com": { name: "Kavya Reddy", password: "Welcome@123", apps: [["Java Full Stack Engineer", "HDFC Bank", "BGV"]] }
+    };
+    let portal = "staff";
+    tabStaff.onclick = () => {
+      portal = "staff"; tabStaff.classList.add("on"); tabCand.classList.remove("on");
+      email.value = "arjun.mehta@meridian.tech"; password.value = "Meridian@2026";
+      hint.innerHTML = "Recruiter demo: arjun.mehta@meridian.tech / Meridian@2026<br />TA Head: priya.nair@meridian.tech / Meridian@2026";
+      err.textContent = "";
+    };
+    tabCand.onclick = () => {
+      portal = "candidate"; tabCand.classList.add("on"); tabStaff.classList.remove("on");
+      email.value = "aditya.menon@example.com"; password.value = "Welcome@123";
+      hint.innerHTML = "Candidate demo: aditya.menon@example.com / Welcome@123<br />nisha.verma@example.com / Welcome@123";
+      err.textContent = "";
+    };
+    function show(id) {
+      login.style.display = id === "login" ? "grid" : "none";
+      app.style.display = id === "app" ? "grid" : "none";
+      cand.style.display = id === "cand" ? "grid" : "none";
+    }
+    go.onclick = () => {
+      const em = email.value.trim().toLowerCase();
+      if (portal === "staff") {
+        const u = staff[em];
+        if (!u || u.password !== password.value) { err.textContent = "Invalid recruiter email or password"; return; }
+        show("app");
+      } else {
+        const c = cands[em];
+        if (!c || c.password !== password.value) { err.textContent = "Invalid candidate email or password"; return; }
+        candHello.textContent = "Hello, " + c.name;
+        candApps.innerHTML = c.apps.map((a) => "<tr><td>" + a[0] + "</td><td>" + a[1] + "</td><td>" + a[2] + "</td></tr>").join("");
+        show("cand");
+      }
+    };
+    logoutStaff.onclick = logoutCand.onclick = (e) => { e.preventDefault(); show("login"); };
+
     const pages = { dash: ["Head of TA · daily pulse", "Open hiring for 4 client projects"], jobs: ["Job requisitions", "Client-tied open positions"], pipe: ["Kanban pipeline", "Applied → Joined (client round & BGV)"], cands: ["Candidate database", "Search, source, duplicate-safe records"] };
-    document.querySelectorAll("nav a").forEach((a) => {
+    document.querySelectorAll("#app nav a").forEach((a) => {
       a.onclick = () => {
-        document.querySelectorAll("nav a").forEach((x) => x.classList.remove("on"));
+        document.querySelectorAll("#app nav a").forEach((x) => x.classList.remove("on"));
         a.classList.add("on");
         Object.keys(pages).forEach((id) => { document.getElementById(id).hidden = id !== a.dataset.page; });
         document.getElementById("eyebrow").textContent = pages[a.dataset.page][0];
