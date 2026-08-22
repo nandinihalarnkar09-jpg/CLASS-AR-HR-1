@@ -2,25 +2,27 @@
 
 Internal recruiting prototype for Meridian Technologies Pvt. Ltd. (Indian IT services, ~450 employees). Replaces shared Excel on a network drive for 4 recruiters, 1 Head of Talent Acquisition, and ~15 hiring managers.
 
-**In scope:** requisitions tied to client projects, candidate pipeline including client round and BGV, duplicate-phone warnings, source tracking, DPDP-oriented consent and audit, recruiter and candidate login.
+**http://localhost:5173 only works after you start the app on your PC.** GitHub is not a live website. If you type that address with no server running, the browser will say it cannot connect.
 
-**Out of scope:** payroll, post-join onboarding, performance management, AI features.
-
-## How to open the web page
-
-GitHub is **only the code**. Opening the repository URL will not show the ATS. You must run the app on your computer, then use a browser.
-
-Standalone HTML (login + demo UI):
-
+### Fastest: no Node required
+Double-click **`ats.html`** in this folder, or use:
 https://htmlpreview.github.io/?https://github.com/nandinihalarnkar09-jpg/CLASS-AR-HR-1/blob/cursor/meridian-ats-mvp-798e/ats.html
 
-### Windows (easiest)
-
-1. Install **Node.js LTS** from https://nodejs.org (keep the “Add to PATH” box checked).
-2. Download this project: GitHub → green **Code** → **Download ZIP**, then unzip.
+### Windows — start localhost:5173
+1. Install **Node.js LTS** from https://nodejs.org and tick **Add to PATH**.
+2. Unzip the project (or `git checkout cursor/meridian-ats-mvp-798e`).
 3. Double-click **`OPEN-THE-WEBSITE.bat`**.
-4. When Chrome/Edge opens, go to **http://localhost:5173** if it did not open by itself.
-5. **Leave the black terminal window open** while you use the site.
+4. Wait until the window says the server is ready, then open **http://localhost:5173**
+5. Do not close the black window.
+
+If install of the database fails, the website still starts (demo mode).
+
+```bash
+npm install --prefix client
+npm run web
+```
+
+Then open http://localhost:5173
 
 ### Mac / Linux
 
