@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian ATS — Talent Acquisition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #102033; --navy: #16324f; --paper: #f4efe6; --card: #fffdf8;
+      --line: #d9cfc0; --brass: #b8893a; --brass-d: #8f6828; --teal: #2a6f6a;
+      --danger: #9b3a32; --warn: #b26a1e; --ok: #2f6b45; --muted: #6b6258;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "IBM Plex Sans", sans-serif; background: var(--paper); color: var(--ink); }
+    h1, h2, h3, .brand { font-family: Fraunces, Georgia, serif; font-weight: 560; }
+    .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+    .sidebar { background: linear-gradient(180deg, var(--ink), var(--navy)); color: #f7f1e6; padding: 28px 20px; display: flex; flex-direction: column; gap: 22px; }
+    .mark { width: 36px; height: 36px; border: 1.5px solid var(--brass); display: grid; place-items: center; color: var(--brass); margin-bottom: 8px; }
+    .sidebar small { color: #cbbfae; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; }
+    nav a { display: block; color: #eadfce; text-decoration: none; padding: 10px 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; }
+    nav a.on, nav a:hover { background: rgba(184,137,58,.18); color: #fff; }
+    .main { padding: 28px 32px 48px; min-width: 0; }
+    .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass-d); margin: 0 0 6px; }
+    .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 18px 0; }
+    .kpi, .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+    .kpi span { color: var(--muted); font-size: 12px; display: block; }
+    .kpi strong { font-family: Fraunces, serif; font-size: 28px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .kanban { display: grid; grid-template-columns: repeat(7, minmax(180px, 1fr)); gap: 10px; overflow-x: auto; }
+    .col { background: #efe8dc; border-radius: 12px; padding: 10px; min-height: 360px; }
+    .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 99px; background: #ece5d6; margin-top: 4px; }
+    .tag.high { background: #f4d9d6; color: var(--danger); }
+    .meta { color: var(--muted); font-size: 12px; }
+    .chip { font-size: 12px; background: #ece5d6; border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .kpis { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div>
+        <div class="mark">M</div>
+        <div class="brand">Meridian ATS</div>
+        <small>Talent · DPDP v1</small>
+      </div>
+      <nav>
+        <a class="on" data-page="dash">Dashboard</a>
+        <a data-page="jobs">Requisitions</a>
+        <a data-page="pipe">Pipeline</a>
+        <a data-page="cands">Candidates</a>
+      </nav>
+      <p class="meta" style="color:#cbbfae;margin-top:auto">Meridian Technologies Pvt. Ltd.<br />Open this file in any browser.</p>
+    </aside>
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <p class="eyebrow" id="eyebrow">Head of TA · daily pulse</p>
+          <h1 id="title" style="margin:0">Open hiring for 4 client projects</h1>
+        </div>
+        <span class="chip">Personal data · purpose-limited to hiring · 3-year retention</span>
+      </div>
+
+      <section id="dash">
+        <div class="kpis">
+          <div class="kpi"><span>Open positions</span><strong>4</strong></div>
+          <div class="kpi"><span>Active pipeline</span><strong>5</strong></div>
+          <div class="kpi"><span>Offer / BGV</span><strong>2</strong></div>
+          <div class="kpi"><span>Joined (30d)</span><strong>1</strong></div>
+          <div class="kpi"><span>Dropped out</span><strong>1</strong></div>
+          <div class="kpi"><span>Avg days to fill</span><strong>42</strong></div>
+        </div>
+        <div class="card">
+          <h2>Candidates by stage</h2>
+          <p>Applied 1 · Screened 1 · Internal 1 · Client round 1 · Offered 1 · BGV 1 · Joined 0</p>
+          <p class="meta">Source mix: Naukri, LinkedIn, Referral, Adecco (8.33% CTC). Notice period flagged against project start dates.</p>
+        </div>
+      </section>
+
+      <section id="jobs" hidden>
+        <div class="card" style="margin-top:18px">
+          <table>
+            <thead><tr><th>Title</th><th>Client / project</th><th>Billing</th><th>Band</th><th>Location</th><th>Close by</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Java Full Stack Engineer</strong><div class="meta">Java, Spring Boot, React</div></td><td>HDFC Bank<div class="meta">Digital Lending · 15 Sep</div></td><td>₹185k / mo</td><td>4–8 yrs · 18–28 LPA</td><td>Bengaluru</td><td>2026-09-10</td></tr>
+              <tr><td><strong>React Frontend Developer</strong><div class="meta">React, TypeScript</div></td><td>HDFC Bank<div class="meta">Digital Lending</div></td><td>₹185k / mo</td><td>3–6 yrs · 14–22 LPA</td><td>Hyderabad</td><td>2026-09-20</td></tr>
+              <tr><td><strong>Data Engineer</strong><div class="meta">Python, Spark, Kafka</div></td><td>Tata Motors<div class="meta">Connected Vehicle</div></td><td>₹165k / mo</td><td>5–9 yrs · 20–32 LPA</td><td>Pune</td><td>2026-08-28</td></tr>
+              <tr><td><strong>DevOps Engineer</strong><div class="meta">K8s, Terraform, AWS</div></td><td>Reliance Jio<div class="meta">5G OSS · 25 Aug</div></td><td>₹175k / mo</td><td>4–7 yrs · 18–26 LPA</td><td>Mumbai</td><td>2026-08-22</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="pipe" hidden>
+        <div class="kanban" style="margin-top:18px">
+          <div class="col"><h3>Applied</h3><div class="item"><h4 style="margin:0">Siddharth Jain</h4><div class="meta">DevOps · Jio</div><span class="tag high">90d notice</span></div></div>
+          <div class="col"><h3>Screened</h3><div class="item"><h4 style="margin:0">Nisha Verma</h4><div class="meta">React · HDFC</div><span class="tag">linkedin</span></div></div>
+          <div class="col"><h3>Internal</h3><div class="item"><h4 style="margin:0">Pooja Desai</h4><div class="meta">React · HDFC</div></div></div>
+          <div class="col"><h3>Client round</h3><div class="item"><h4 style="margin:0">Aditya Menon</h4><div class="meta">Java · HDFC</div><span class="tag high">Notice vs start</span></div></div>
+          <div class="col"><h3>Offered</h3><div class="item"><h4 style="margin:0">Farhan Qureshi</h4><div class="meta">Data · Tata · 28 LPA</div><span class="tag">Adecco 8.33%</span></div></div>
+          <div class="col"><h3>BGV</h3><div class="item"><h4 style="margin:0">Kavya Reddy</h4><div class="meta">Java · HDFC · join 1 Sep</div></div></div>
+          <div class="col"><h3>Joined</h3><div class="item"><h4 style="margin:0">Anjali Kulkarni</h4><div class="meta">Data · Tata</div></div></div>
+        </div>
+      </section>
+
+      <section id="cands" hidden>
+        <div class="card" style="margin-top:18px">
+          <table>
+            <thead><tr><th>Name</th><th>Phone / email</th><th>Company</th><th>Notice</th><th>Skills</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>Aditya Menon</td><td>9876500001<div class="meta">aditya.menon@example.com</div></td><td>Wipro</td><td>90 days</td><td>Java, Spring, React</td><td>Naukri</td></tr>
+              <tr><td>Nisha Verma</td><td>9876500002<div class="meta">nisha.verma@example.com</div></td><td>TCS</td><td>30 days</td><td>React, TypeScript</td><td>LinkedIn</td></tr>
+              <tr><td>Farhan Qureshi</td><td>9876500003<div class="meta">farhan.q@example.com</div></td><td>Capgemini</td><td>60 days</td><td>Python, Spark, Kafka</td><td>Adecco</td></tr>
+              <tr><td>Kavya Reddy</td><td>9876500004<div class="meta">kavya.reddy@example.com</div></td><td>Accenture</td><td>15 days</td><td>Java, Microservices</td><td>Referral</td></tr>
+            </tbody>
+          </table>
+          <p class="meta">Duplicate phone numbers are blocked. DPDP consent required before storing candidate data. No payroll / onboarding / AI in v1.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const pages = { dash: ["Head of TA · daily pulse", "Open hiring for 4 client projects"], jobs: ["Job requisitions", "Client-tied open positions"], pipe: ["Kanban pipeline", "Applied → Joined (client round & BGV)"], cands: ["Candidate database", "Search, source, duplicate-safe records"] };
+    document.querySelectorAll("nav a").forEach((a) => {
+      a.onclick = () => {
+        document.querySelectorAll("nav a").forEach((x) => x.classList.remove("on"));
+        a.classList.add("on");
+        Object.keys(pages).forEach((id) => { document.getElementById(id).hidden = id !== a.dataset.page; });
+        document.getElementById("eyebrow").textContent = pages[a.dataset.page][0];
+        document.getElementById("title").textContent = pages[a.dataset.page][1];
+      };
+    });
+  </script>
+</body>
+</html>
