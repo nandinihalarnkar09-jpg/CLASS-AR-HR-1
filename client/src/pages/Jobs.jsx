@@ -9,6 +9,8 @@ const empty = {
   skills_required: "",
   description: "",
   requirements: "",
+  pay: "",
+  benefits: "",
   exp_min_years: 3,
   exp_max_years: 7,
   ctc_min_lpa: 12,
@@ -108,6 +110,12 @@ export default function Jobs({ meta }) {
             </label>
             <label className="field full">Requirements (one per line)
               <textarea rows={5} value={edit.requirements || ""} onChange={(e) => setEdit({ ...edit, requirements: e.target.value })} required />
+            </label>
+            <label className="field full">Pay (CTC, variable, bonuses)
+              <textarea rows={2} value={edit.pay || ""} onChange={(e) => setEdit({ ...edit, pay: e.target.value })} />
+            </label>
+            <label className="field full">Benefits (one per line)
+              <textarea rows={4} value={edit.benefits || ""} onChange={(e) => setEdit({ ...edit, benefits: e.target.value })} />
             </label>
             <label className="field full">Skills required
               <input value={edit.skills_required} onChange={(e) => setEdit({ ...edit, skills_required: e.target.value })} required />

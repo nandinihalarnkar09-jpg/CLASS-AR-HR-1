@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   target_closure_date TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   requirements TEXT NOT NULL DEFAULT '',
+  pay TEXT NOT NULL DEFAULT '',
+  benefits TEXT NOT NULL DEFAULT '',
   recruiter_id INTEGER REFERENCES users(id),
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'on_hold', 'closed', 'filled')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),

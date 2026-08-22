@@ -147,7 +147,13 @@
     <main class="main">
       <p class="eyebrow">Candidate portal</p>
       <h1 id="candHello">Hello</h1>
-      <div class="card" id="candJobCard" style="margin-top:16px"></div>
+      <div class="card" style="margin-top:16px">
+        <h2>Your current application</h2>
+        <div id="candCurrent"></div>
+      </div>
+      <h2 style="margin-top:28px">Open jobs</h2>
+      <p class="meta">Apply to multiple roles. Each opening lists job description, requirements, pay, and company benefits.</p>
+      <div id="candOpenJobs" style="display:grid;gap:14px;margin-top:12px"></div>
     </main>
   </div>
 
@@ -156,32 +162,44 @@
       {
         title: "Java Full Stack Engineer", client: "HDFC Bank", project: "Digital Lending", billing: "₹185k / mo", band: "4–8 yrs · 18–28 LPA", loc: "Bengaluru", close: "2026-09-10",
         description: "Build and own end-to-end features on the Digital Lending Platform: REST APIs in Spring Boot, React screens for loan origination, and PostgreSQL data model changes. You will work with the client squad, take part in client-round demos, and support production releases.",
-        requirements: ["4–8 years in Java (17+) and Spring Boot", "Hands-on React and PostgreSQL", "Experience on banking or lending systems preferred", "Notice period must fit a 15 Sep 2026 project start", "Willingness to join after BGV clearance"]
+        requirements: ["4–8 years in Java (17+) and Spring Boot", "Hands-on React and PostgreSQL", "Experience on banking or lending systems preferred", "Notice period must fit a 15 Sep 2026 project start", "Willingness to join after BGV clearance"],
+        pay: "₹18–28 LPA CTC (about 80% fixed + 20% variable). Joining bonus ₹1,00,000 after 90 days in employment.",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater + personal accident cover", "Hybrid: 8 office / 12 WFH days per month after probation", "₹25,000 annual learning budget and certification support", "Relocation assistance up to ₹50,000 for Bengaluru joins"]
       },
       {
         title: "React Frontend Developer", client: "HDFC Bank", project: "Core Banking", billing: "₹185k / mo", band: "3–6 yrs · 14–22 LPA", loc: "Hyderabad", close: "2026-09-20",
         description: "Create accessible, tested UI for Core Banking Modernisation. Implement TypeScript React modules, Redux state, and Jest coverage, then present builds in the internal interview and a client round.",
-        requirements: ["3–6 years of React and TypeScript", "Redux (or equivalent) and Jest/RTL", "Strong CSS and design-system discipline", "Comfortable with Hyderabad hybrid delivery", "CTC expectation within 14–22 LPA"]
+        requirements: ["3–6 years of React and TypeScript", "Redux (or equivalent) and Jest/RTL", "Strong CSS and design-system discipline", "Comfortable with Hyderabad hybrid delivery", "CTC expectation within 14–22 LPA"],
+        pay: "₹14–22 LPA CTC (85% fixed + 15% variable). Review at 12 months.",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Hyderabad hybrid (3 days office)", "Internet stipend ₹1,500/month", "₹20,000 annual learning budget"]
       },
       {
         title: "Data Engineer", client: "Tata Motors", project: "Connected Vehicle", billing: "₹165k / mo", band: "5–9 yrs · 20–32 LPA", loc: "Pune", close: "2026-08-28",
         description: "Design Spark/Kafka pipelines on AWS for Connected Vehicle Analytics. Ingest telemetry, publish curated datasets, and support analysts. Client approval is required before offer; BGV is mandatory before joining.",
-        requirements: ["5–9 years in data engineering", "Python, Spark, Kafka, and AWS (S3/EMR/MSK)", "Performance tuning on large batch/stream jobs", "Able to work from Pune with travel to client sites", "Notice period compatible with 1 Sep 2026 start"]
+        requirements: ["5–9 years in data engineering", "Python, Spark, Kafka, and AWS (S3/EMR/MSK)", "Performance tuning on large batch/stream jobs", "Able to work from Pune with travel to client sites", "Notice period compatible with 1 Sep 2026 start"],
+        pay: "₹20–32 LPA CTC (80% fixed + 20% variable). Spot bonus for on-time pipeline go-live.",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹7.5 lakh floater", "Pune office + client travel reimbursed at actuals", "₹30,000 annual cloud certification budget", "Term life cover 3× CTC"]
       },
       {
         title: "QA Automation Lead", client: "Infosys BPM", project: "KYC Automation", billing: "₹140k / mo", band: "6–10 yrs · 16–24 LPA", loc: "Chennai", close: "2026-10-15",
         description: "Lead automation for KYC Automation: framework design in Selenium/Cypress, API test packs, and a small QA pod. Define exit criteria for client round and sign off BGV-ready releases.",
-        requirements: ["6–10 years in QA with 2+ years leading automation", "Java, Selenium, Cypress, REST API testing", "CI integration (Jenkins/GitHub Actions)", "Chennai-based or ready to relocate", "Experience in BFSI/KYC is a plus"]
+        requirements: ["6–10 years in QA with 2+ years leading automation", "Java, Selenium, Cypress, REST API testing", "CI integration (Jenkins/GitHub Actions)", "Chennai-based or ready to relocate", "Experience in BFSI/KYC is a plus"],
+        pay: "₹16–24 LPA CTC (80% fixed + 20% variable). Team-lead allowance ₹15,000/month after confirmation.",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Relocation to Chennai up to ₹40,000", "₹25,000 learning budget", "12 casual + 12 earned leave"]
       },
       {
         title: "DevOps Engineer", client: "Reliance Jio", project: "5G OSS", billing: "₹175k / mo", band: "4–7 yrs · 18–26 LPA", loc: "Mumbai", close: "2026-08-22",
         description: "Run Kubernetes, Terraform, and Jenkins for 5G OSS support. Own environments, deployment pipelines, and on-call for production windows. Client round with OSS stakeholders is required.",
-        requirements: ["4–7 years DevOps/SRE", "Kubernetes, Terraform, Jenkins, AWS", "Linux, networking, and observability (Prometheus/Grafana)", "Mumbai location preferred", "Notice period must fit a 25 Aug project start"]
+        requirements: ["4–7 years DevOps/SRE", "Kubernetes, Terraform, Jenkins, AWS", "Linux, networking, and observability (Prometheus/Grafana)", "Mumbai location preferred", "Notice period must fit a 25 Aug project start"],
+        pay: "₹18–26 LPA CTC (75% fixed + 25% variable tied to uptime SLAs). On-call stipend ₹8,000/month.",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh + accident cover for on-call staff", "Meal coupons ₹2,200/month", "₹30,000 CKA/CKS certification support", "Comp-off for weekend production windows"]
       },
       {
         title: "Business Analyst", client: "Mahindra Finance", project: "Collections", billing: "₹150k / mo", band: "5–8 yrs · 15–22 LPA", loc: "Mumbai", close: "2026-10-01",
         description: "Translate Collections Transformation needs into user stories, SQL-backed reports, and UAT scripts. Sit with operations SMEs, facilitate internal and client workshops, and track drop-off between offer and joining.",
-        requirements: ["5–8 years BA experience, ideally BFSI collections", "SQL, Jira, and stakeholder management", "Ability to write clear acceptance criteria", "Mumbai-based", "Comfortable with a 20 Oct 2026 programme start"]
+        requirements: ["5–8 years BA experience, ideally BFSI collections", "SQL, Jira, and stakeholder management", "Ability to write clear acceptance criteria", "Mumbai-based", "Comfortable with a 20 Oct 2026 programme start"],
+        pay: "₹15–22 LPA CTC (90% fixed + 10% variable).",
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Mumbai 3+2 hybrid after workshops", "LTA as per IT rules", "₹15,000 domain course support"]
       }
     ];
     const STAGES = ["Applied", "Screened", "Internal Interview", "Client Round", "Offered", "BGV", "Joined"];
@@ -265,7 +283,9 @@
         '<div class="card"><h2 style="margin-top:0">' + j.title + "</h2>" +
         '<p class="meta">' + j.client + " · " + j.project + " · " + j.loc + " · " + j.band + " · close " + j.close + " · " + j.billing + "</p>" +
         "<h3>Job description</h3><p>" + j.description + "</p>" +
-        "<h3>Requirements</h3><ul>" + j.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul></div>"
+        "<h3>Requirements</h3><ul>" + j.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul>" +
+        "<h3>Pay</h3><p>" + j.pay + "</p>" +
+        "<h3>Benefits</h3><ul>" + j.benefits.map((r) => "<li>" + r + "</li>").join("") + "</ul></div>"
       ).join("");
     }
 
@@ -328,10 +348,32 @@
         const c = PEOPLE.find((p) => p.email === em);
         if (!c || c.password !== password.value) { err.textContent = "Invalid candidate email or password"; return; }
         candHello.textContent = "Hello, " + c.name;
-        const job = JOBS.find((j) => j.title === c.job) || JOBS[0];
-        candJobCard.innerHTML = "<h2 style=\"margin-top:0\">My application</h2><p><strong>" + job.title + "</strong> · " + job.client + " · " + c.stage + " · " + c.outcome + "</p>" +
-          "<h3>Job description</h3><p>" + job.description + "</p>" +
-          "<h3>Requirements</h3><ul>" + job.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul>";
+        const current = JOBS.find((j) => j.title === c.job) || JOBS[0];
+        candCurrent.innerHTML = "<p><strong>" + current.title + "</strong> · " + current.client + " · stage: " + c.stage + " (" + c.outcome + ")</p>";
+        const appliedKey = "ats-applied-" + em;
+        const applied = new Set(JSON.parse(localStorage.getItem(appliedKey) || "[]"));
+        applied.add(current.title);
+        function drawOpen() {
+          candOpenJobs.innerHTML = JOBS.map((j) => {
+            const isOn = applied.has(j.title);
+            return '<div class="card"><h2 style="margin-top:0">' + j.title + "</h2>" +
+              '<p class="meta">' + j.client + " · " + j.project + " · " + j.loc + " · " + j.band + "</p>" +
+              "<h3>Job description</h3><p>" + j.description + "</p>" +
+              "<h3>Requirements</h3><ul>" + j.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul>" +
+              "<h3>Pay</h3><p>" + j.pay + "</p>" +
+              "<h3>Benefits the company provides</h3><ul>" + j.benefits.map((r) => "<li>" + r + "</li>").join("") + "</ul>" +
+              (isOn ? '<span class="tag">Applied</span>' : '<button class="btn" data-job="' + j.title.replace(/"/g, "") + '">Apply to this job</button>') +
+              "</div>";
+          }).join("");
+          candOpenJobs.querySelectorAll("button[data-job]").forEach((btn) => {
+            btn.onclick = () => {
+              applied.add(btn.getAttribute("data-job"));
+              localStorage.setItem(appliedKey, JSON.stringify([...applied]));
+              drawOpen();
+            };
+          });
+        }
+        drawOpen();
         show("cand");
       }
     };

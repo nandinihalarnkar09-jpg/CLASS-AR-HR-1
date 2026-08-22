@@ -53,19 +53,23 @@ export default function CandidatePortal({ session, onLogout }) {
         </table>
       </div>
       <div className="card" style={{ marginTop: 16 }}>
-        <h2>Open positions</h2>
-        <p className="meta">Apply only if you have consented to processing your data for this search.</p>
+        <h2>Open jobs — apply to as many as you like</h2>
+        <p className="meta">Each card shows the job description, requirements, pay, and company benefits. Apply only if you consent to processing your data for this search.</p>
         {jobs.map((j) => (
           <div key={j.id} className="card" style={{ marginTop: 12, boxShadow: "none" }}>
             <h3 style={{ marginTop: 0 }}>{j.title}</h3>
             <p className="meta">{j.client_name} · {j.location} · {j.exp_min_years}–{j.exp_max_years} yrs</p>
+            <h4>Job description</h4>
             <p>{j.description}</p>
-            <p className="meta"><strong>Requirements</strong></p>
+            <h4>Requirements</h4>
             <ul>{(j.requirements || "").split("\n").filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>
-            <p className="meta">Skills: {j.skills_required}</p>
+            <h4>Pay</h4>
+            <p>{j.pay}</p>
+            <h4>Benefits</h4>
+            <ul>{(j.benefits || "").split("\n").filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>
             {j.applied
               ? <span className="tag ok">Applied</span>
-              : <button className="btn small" onClick={() => apply(j.id)}>Apply</button>}
+              : <button className="btn small" onClick={() => apply(j.id)}>Apply to this job</button>}
           </div>
         ))}
       </div>

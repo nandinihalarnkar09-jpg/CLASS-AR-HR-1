@@ -39,6 +39,12 @@ function migrate(db) {
   if (!columnNames(db, "jobs").includes("requirements")) {
     db.exec("ALTER TABLE jobs ADD COLUMN requirements TEXT NOT NULL DEFAULT ''");
   }
+  if (!columnNames(db, "jobs").includes("pay")) {
+    db.exec("ALTER TABLE jobs ADD COLUMN pay TEXT NOT NULL DEFAULT ''");
+  }
+  if (!columnNames(db, "jobs").includes("benefits")) {
+    db.exec("ALTER TABLE jobs ADD COLUMN benefits TEXT NOT NULL DEFAULT ''");
+  }
 }
 
 module.exports = { openDb, DATA_DIR, UPLOAD_DIR, DB_PATH };
