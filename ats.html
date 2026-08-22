@@ -3,65 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meridian ATS — Talent Acquisition</title>
+  <title>ATS software</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #102033; --navy: #16324f; --paper: #f4efe6; --card: #fffdf8;
-      --line: #d9cfc0; --brass: #b8893a; --brass-d: #8f6828; --teal: #2a6f6a;
-      --danger: #9b3a32; --warn: #b26a1e; --ok: #2f6b45; --muted: #6b6258;
+      --bg: #f3f5f8; --ink: #121826; --muted: #5c6778; --line: #d7dde6;
+      --card: #fff; --side: #0f1724; --accent: #0f766e; --warn: #b45309; --danger: #b42318;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "IBM Plex Sans", sans-serif; background: var(--paper); color: var(--ink); }
-    h1, h2, h3, .brand { font-family: Fraunces, Georgia, serif; font-weight: 560; }
-    .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
-    .sidebar { background: linear-gradient(180deg, var(--ink), var(--navy)); color: #f7f1e6; padding: 28px 20px; display: flex; flex-direction: column; gap: 22px; }
-    .mark { width: 36px; height: 36px; border: 1.5px solid var(--brass); display: grid; place-items: center; color: var(--brass); margin-bottom: 8px; }
-    .sidebar small { color: #cbbfae; letter-spacing: .08em; text-transform: uppercase; font-size: 11px; }
-    nav a { display: block; color: #eadfce; text-decoration: none; padding: 10px 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; }
-    nav a.on, nav a:hover { background: rgba(184,137,58,.18); color: #fff; }
+    body { margin: 0; font-family: "IBM Plex Sans", sans-serif; background: var(--bg); color: var(--ink); }
+    h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
+    .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+    .sidebar { background: var(--side); color: #e8eef5; padding: 24px 18px; display: flex; flex-direction: column; gap: 20px; }
+    .mark { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #5eead4; }
+    .brand { font-size: 22px; font-weight: 700; margin-top: 6px; }
+    nav a { display: block; color: #c5d0dc; text-decoration: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+    nav a.on, nav a:hover { background: #1c2a3d; color: #fff; }
     .main { padding: 28px 32px 48px; min-width: 0; }
-    .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass-d); margin: 0 0 6px; }
+    .eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin: 0 0 6px; }
     .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 18px 0; }
-    .kpi, .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+    .kpi, .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
     .kpi span { color: var(--muted); font-size: 12px; display: block; }
-    .kpi strong { font-family: Fraunces, serif; font-size: 28px; }
+    .kpi strong { font-size: 26px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
     th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
-    .kanban { display: grid; grid-template-columns: repeat(7, minmax(180px, 1fr)); gap: 10px; overflow-x: auto; }
-    .col { background: #efe8dc; border-radius: 12px; padding: 10px; min-height: 360px; }
+    .kanban { display: grid; grid-template-columns: repeat(7, minmax(200px, 1fr)); gap: 10px; overflow-x: auto; }
+    .col { background: #e8edf3; border-radius: 12px; padding: 10px; max-height: 70vh; overflow: auto; }
     .item { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
-    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 99px; background: #ece5d6; margin-top: 4px; }
-    .tag.high { background: #f4d9d6; color: var(--danger); }
+    .tag { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 99px; background: #e6eef0; margin: 4px 4px 0 0; }
+    .tag.high { background: #fde8e8; color: var(--danger); }
     .meta { color: var(--muted); font-size: 12px; }
-    .chip { font-size: 12px; background: #ece5d6; border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; }
-    .login-shell { min-height: 100vh; display: grid; grid-template-columns: 1.1fr .9fr; }
-    .login-hero { background: linear-gradient(180deg, var(--ink), var(--navy)); color: #f7f1e6; padding: 64px 48px; }
-    .login-panel { padding: 48px 36px; }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .toolbar input, .toolbar select { border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px; font: inherit; }
+    .login-shell { min-height: 100vh; display: grid; grid-template-columns: 1.05fr 0.95fr; }
+    .login-hero { background: var(--side); color: #e8eef5; padding: 64px 48px; display: flex; flex-direction: column; justify-content: center; }
+    .login-panel { padding: 48px 36px; display: flex; flex-direction: column; justify-content: center; background: #fff; }
     .portal-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 18px; }
     .portal-toggle button { border: 1px solid var(--line); background: #fff; padding: 12px; border-radius: 10px; cursor: pointer; font: inherit; }
-    .portal-toggle button.on { background: var(--ink); color: #fff; }
+    .portal-toggle button.on { background: var(--side); color: #fff; }
     label.field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 10px; }
     input { border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px; font: inherit; }
-    .btn { background: var(--ink); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 16px; font: inherit; }
+    .btn { background: var(--side); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; font: inherit; }
+    .btn.full { width: 100%; margin-top: 16px; }
     .hint { font-size: 13px; color: var(--muted); margin-top: 18px; }
-    #app { display: none; }
-    #cand { display: none; }
+    #app, #cand { display: none; }
     @media (max-width: 900px) {
-      .app { grid-template-columns: 1fr; }
+      .app, .login-shell { grid-template-columns: 1fr; }
       .kpis { grid-template-columns: 1fr 1fr; }
-      .login-shell { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div id="login" class="login-shell">
     <div class="login-hero">
-      <div class="mark">M</div>
-      <h1>Meridian ATS</h1>
-      <p>Recruiters run client hiring. Candidates check application status.</p>
+      <div class="mark">Applicant tracking</div>
+      <h1 class="brand" style="font-size:42px">ATS software</h1>
+      <p>Recruiters manage the hiring pipeline. Candidates sign in to check status.</p>
     </div>
     <div class="login-panel">
       <p class="eyebrow">Sign in</p>
@@ -70,20 +69,19 @@
         <button type="button" id="tabStaff" class="on">Recruiter</button>
         <button type="button" id="tabCand">Candidate</button>
       </div>
-      <label class="field">Email <input id="email" type="email" value="arjun.mehta@meridian.tech" /></label>
-      <label class="field">Password <input id="password" type="password" value="Meridian@2026" /></label>
-      <p id="err" style="color:#9b3a32;font-size:13px"></p>
-      <button class="btn" id="go">Enter</button>
-      <p class="hint" id="hint">Recruiter demo: arjun.mehta@meridian.tech / Meridian@2026<br />TA Head: priya.nair@meridian.tech / Meridian@2026</p>
+      <label class="field">Email <input id="email" type="email" value="recruiter@ats.software" /></label>
+      <label class="field">Password <input id="password" type="password" value="Ats@2026" /></label>
+      <p id="err" style="color:#b42318;font-size:13px"></p>
+      <button class="btn full" id="go">Enter</button>
+      <p class="hint" id="hint">Recruiter: recruiter@ats.software / Ats@2026<br />Admin: admin@ats.software / Ats@2026</p>
     </div>
   </div>
 
   <div id="app" class="app">
     <aside class="sidebar">
       <div>
-        <div class="mark">M</div>
-        <div class="brand">Meridian ATS</div>
-        <small>Talent · DPDP v1</small>
+        <div class="mark">Software</div>
+        <div class="brand">ATS software</div>
       </div>
       <nav>
         <a class="on" data-page="dash">Dashboard</a>
@@ -91,72 +89,53 @@
         <a data-page="pipe">Pipeline</a>
         <a data-page="cands">Candidates</a>
       </nav>
-      <p class="meta" style="color:#cbbfae;margin-top:auto">Meridian Technologies Pvt. Ltd.</p>
-      <p><a href="#" id="logoutStaff" style="color:#eadfce">Log out</a></p>
+      <p class="meta" style="color:#9aa8b8;margin-top:auto">ATS software</p>
+      <p><a href="#" id="logoutStaff" style="color:#c5d0dc">Log out</a></p>
     </aside>
     <main class="main">
-      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div>
-          <p class="eyebrow" id="eyebrow">Head of TA · daily pulse</p>
-          <h1 id="title" style="margin:0">Open hiring for 4 client projects</h1>
-        </div>
-        <span class="chip">Personal data · purpose-limited to hiring · 3-year retention</span>
-      </div>
+      <p class="eyebrow" id="eyebrow">Overview</p>
+      <h1 id="title" style="margin:0">Hiring pipeline</h1>
 
       <section id="dash">
-        <div class="kpis">
-          <div class="kpi"><span>Open positions</span><strong>4</strong></div>
-          <div class="kpi"><span>Active pipeline</span><strong>5</strong></div>
-          <div class="kpi"><span>Offer / BGV</span><strong>2</strong></div>
-          <div class="kpi"><span>Joined (30d)</span><strong>1</strong></div>
-          <div class="kpi"><span>Dropped out</span><strong>1</strong></div>
-          <div class="kpi"><span>Avg days to fill</span><strong>42</strong></div>
-        </div>
-        <div class="card">
-          <h2>Candidates by stage</h2>
-          <p>Applied 1 · Screened 1 · Internal 1 · Client round 1 · Offered 1 · BGV 1 · Joined 0</p>
-          <p class="meta">Source mix: Naukri, LinkedIn, Referral, Adecco (8.33% CTC). Notice period flagged against project start dates.</p>
-        </div>
+        <div class="kpis" id="kpis"></div>
+        <div class="card"><h2>Candidates by stage</h2><p id="stageLine"></p></div>
       </section>
 
       <section id="jobs" hidden>
         <div class="card" style="margin-top:18px">
           <table>
             <thead><tr><th>Title</th><th>Client / project</th><th>Billing</th><th>Band</th><th>Location</th><th>Close by</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Java Full Stack Engineer</strong><div class="meta">Java, Spring Boot, React</div></td><td>HDFC Bank<div class="meta">Digital Lending · 15 Sep</div></td><td>₹185k / mo</td><td>4–8 yrs · 18–28 LPA</td><td>Bengaluru</td><td>2026-09-10</td></tr>
-              <tr><td><strong>React Frontend Developer</strong><div class="meta">React, TypeScript</div></td><td>HDFC Bank<div class="meta">Digital Lending</div></td><td>₹185k / mo</td><td>3–6 yrs · 14–22 LPA</td><td>Hyderabad</td><td>2026-09-20</td></tr>
-              <tr><td><strong>Data Engineer</strong><div class="meta">Python, Spark, Kafka</div></td><td>Tata Motors<div class="meta">Connected Vehicle</div></td><td>₹165k / mo</td><td>5–9 yrs · 20–32 LPA</td><td>Pune</td><td>2026-08-28</td></tr>
-              <tr><td><strong>DevOps Engineer</strong><div class="meta">K8s, Terraform, AWS</div></td><td>Reliance Jio<div class="meta">5G OSS · 25 Aug</div></td><td>₹175k / mo</td><td>4–7 yrs · 18–26 LPA</td><td>Mumbai</td><td>2026-08-22</td></tr>
-            </tbody>
+            <tbody id="jobsBody"></tbody>
           </table>
         </div>
       </section>
 
       <section id="pipe" hidden>
-        <div class="kanban" style="margin-top:18px">
-          <div class="col"><h3>Applied</h3><div class="item"><h4 style="margin:0">Siddharth Jain</h4><div class="meta">DevOps · Jio</div><span class="tag high">90d notice</span></div></div>
-          <div class="col"><h3>Screened</h3><div class="item"><h4 style="margin:0">Nisha Verma</h4><div class="meta">React · HDFC</div><span class="tag">linkedin</span></div></div>
-          <div class="col"><h3>Internal</h3><div class="item"><h4 style="margin:0">Pooja Desai</h4><div class="meta">React · HDFC</div></div></div>
-          <div class="col"><h3>Client round</h3><div class="item"><h4 style="margin:0">Aditya Menon</h4><div class="meta">Java · HDFC</div><span class="tag high">Notice vs start</span></div></div>
-          <div class="col"><h3>Offered</h3><div class="item"><h4 style="margin:0">Farhan Qureshi</h4><div class="meta">Data · Tata · 28 LPA</div><span class="tag">Adecco 8.33%</span></div></div>
-          <div class="col"><h3>BGV</h3><div class="item"><h4 style="margin:0">Kavya Reddy</h4><div class="meta">Java · HDFC · join 1 Sep</div></div></div>
-          <div class="col"><h3>Joined</h3><div class="item"><h4 style="margin:0">Anjali Kulkarni</h4><div class="meta">Data · Tata</div></div></div>
-        </div>
+        <div class="kanban" style="margin-top:18px" id="kanban"></div>
       </section>
 
       <section id="cands" hidden>
         <div class="card" style="margin-top:18px">
-          <table>
-            <thead><tr><th>Name</th><th>Phone / email</th><th>Company</th><th>Notice</th><th>Skills</th><th>Source</th></tr></thead>
-            <tbody>
-              <tr><td>Aditya Menon</td><td>9876500001<div class="meta">aditya.menon@example.com</div></td><td>Wipro</td><td>90 days</td><td>Java, Spring, React</td><td>Naukri</td></tr>
-              <tr><td>Nisha Verma</td><td>9876500002<div class="meta">nisha.verma@example.com</div></td><td>TCS</td><td>30 days</td><td>React, TypeScript</td><td>LinkedIn</td></tr>
-              <tr><td>Farhan Qureshi</td><td>9876500003<div class="meta">farhan.q@example.com</div></td><td>Capgemini</td><td>60 days</td><td>Python, Spark, Kafka</td><td>Adecco</td></tr>
-              <tr><td>Kavya Reddy</td><td>9876500004<div class="meta">kavya.reddy@example.com</div></td><td>Accenture</td><td>15 days</td><td>Java, Microservices</td><td>Referral</td></tr>
-            </tbody>
-          </table>
-          <p class="meta">Duplicate phone numbers are blocked. DPDP consent required before storing candidate data. No payroll / onboarding / AI in v1.</p>
+          <div class="toolbar">
+            <input id="q" placeholder="Search name, phone, skill, company" style="min-width:280px" />
+            <select id="src">
+              <option value="">All sources</option>
+              <option>Naukri</option>
+              <option>LinkedIn</option>
+              <option>Referral</option>
+              <option>Adecco</option>
+              <option>TeamLease</option>
+              <option>Randstad</option>
+              <option>Direct</option>
+            </select>
+            <span class="meta" id="candCount"></span>
+          </div>
+          <div style="max-height:68vh;overflow:auto">
+            <table>
+              <thead><tr><th>Name</th><th>Phone / email</th><th>Company</th><th>Exp / notice</th><th>Skills</th><th>Source</th><th>Stage</th></tr></thead>
+              <tbody id="candBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>
@@ -165,11 +144,10 @@
   <div id="cand" class="app">
     <aside class="sidebar">
       <div>
-        <div class="mark">M</div>
-        <div class="brand">Meridian ATS</div>
-        <small>Candidate portal</small>
+        <div class="mark">Software</div>
+        <div class="brand">ATS software</div>
       </div>
-      <p class="meta" style="color:#cbbfae;margin-top:auto"><a href="#" id="logoutCand" style="color:#eadfce">Log out</a></p>
+      <p class="meta" style="color:#9aa8b8;margin-top:auto"><a href="#" id="logoutCand" style="color:#c5d0dc">Log out</a></p>
     </aside>
     <main class="main">
       <p class="eyebrow">Candidate portal</p>
@@ -185,28 +163,138 @@
   </div>
 
   <script>
+    const JOBS = [
+      { title: "Java Full Stack Engineer", client: "HDFC Bank", project: "Digital Lending", billing: "₹185k / mo", band: "4–8 yrs · 18–28 LPA", loc: "Bengaluru", close: "2026-09-10" },
+      { title: "React Frontend Developer", client: "HDFC Bank", project: "Core Banking", billing: "₹185k / mo", band: "3–6 yrs · 14–22 LPA", loc: "Hyderabad", close: "2026-09-20" },
+      { title: "Data Engineer", client: "Tata Motors", project: "Connected Vehicle", billing: "₹165k / mo", band: "5–9 yrs · 20–32 LPA", loc: "Pune", close: "2026-08-28" },
+      { title: "QA Automation Lead", client: "Infosys BPM", project: "KYC Automation", billing: "₹140k / mo", band: "6–10 yrs · 16–24 LPA", loc: "Chennai", close: "2026-10-15" },
+      { title: "DevOps Engineer", client: "Reliance Jio", project: "5G OSS", billing: "₹175k / mo", band: "4–7 yrs · 18–26 LPA", loc: "Mumbai", close: "2026-08-22" },
+      { title: "Business Analyst", client: "Mahindra Finance", project: "Collections", billing: "₹150k / mo", band: "5–8 yrs · 15–22 LPA", loc: "Mumbai", close: "2026-10-01" }
+    ];
+    const STAGES = ["Applied", "Screened", "Internal Interview", "Client Round", "Offered", "BGV", "Joined"];
+    const FIRST = ["Aditya","Nisha","Farhan","Kavya","Rahul","Pooja","Siddharth","Anjali","Varun","Divya","Ishita","Mohammed","Karan","Meera","Rohit","Sneha","Arjun","Priya","Vikram","Ananya","Harsh","Neha","Aman","Shreya","Nikhil","Tanvi","Abhishek","Ritika","Saurabh","Diya","Yash","Kritika","Manish","Pallavi","Deepak","Aisha","Gaurav","Sanya","Ravi","Isha","Akash","Nandini","Vivek","Simran","Pranav","Aarohi","Kunal","Jhanvi","Omkar","Trisha","Dev","Mira","Sagar","Lavanya","Nitin","Bhavna","Ashwin","Esha","Parth","Rhea"];
+    const LAST = ["Menon","Verma","Qureshi","Reddy","Banerjee","Desai","Jain","Kulkarni","Malhotra","Nambiar","Bose","Irfan","Patel","Krishnan","Sharma","Iyer","Mehta","Nair","Rao","Gupta","Singh","Kapoor","Joshi","Pillai","Chawla","Agarwal","Shetty","Bhatt","Ghosh","Nayak","Das","Kaur","Mishra","Saxena","Trivedi","Naidu","Hegde","Khan","Fernandes","D’Souza"];
+    const COS = ["TCS","Infosys","Wipro","HCLTech","Accenture","Capgemini","Cognizant","L&T Infotech","Tech Mahindra","Persistent","Oracle","IBM","Deloitte","Mindtree","Mphasis","Zoho","Freshworks","Thoughtworks"];
+    const SKILLS = ["Java, Spring Boot, React","React, TypeScript, Redux","Python, Spark, Kafka, AWS","Selenium, Cypress, Java","Kubernetes, Terraform, AWS","BFSI, SQL, Jira","Node.js, PostgreSQL, Redis","Angular, Java, Microservices"];
+    const SOURCES = ["Naukri","LinkedIn","Referral","Adecco","TeamLease","Randstad","Direct"];
+    const NOTICES = [0, 15, 30, 45, 60, 75, 90];
+
+    function buildCandidates() {
+      const rows = [];
+      for (let i = 0; i < 220; i++) {
+        const fn = FIRST[i % FIRST.length];
+        const ln = LAST[(i * 3) % LAST.length];
+        const name = i < 4 && ["Aditya Menon","Nisha Verma","Farhan Qureshi","Kavya Reddy"][i] || (fn + " " + ln);
+        const phone = String(9000000000 + i);
+        const email = i === 0 ? "aditya.menon@example.com"
+          : i === 1 ? "nisha.verma@example.com"
+          : i === 2 ? "farhan.q@example.com"
+          : i === 3 ? "kavya.reddy@example.com"
+          : (fn + "." + ln + i + "@example.com").toLowerCase().replace(/[^a-z0-9.@]/g, "");
+        const job = JOBS[i % JOBS.length];
+        const stage = STAGES[i % 17 === 0 ? 6 : i % 11 === 0 ? 5 : i % STAGES.length];
+        const outcome = i % 23 === 0 ? "Dropped out" : i % 19 === 0 ? "Rejected" : (stage === "Joined" ? "Joined" : "Active");
+        rows.push({
+          id: i + 1, name, phone, email,
+          company: COS[i % COS.length],
+          exp: (3 + (i % 80) / 10).toFixed(1),
+          notice: NOTICES[i % NOTICES.length],
+          skills: SKILLS[i % SKILLS.length],
+          source: SOURCES[i % SOURCES.length],
+          stage: outcome === "Active" || outcome === "Joined" ? stage : "Screened",
+          outcome,
+          job: job.title,
+          client: job.client,
+          ctc: 12 + (i % 18),
+          password: "Welcome@123"
+        });
+      }
+      return rows;
+    }
+
+    const PEOPLE = buildCandidates();
     const staff = {
-      "arjun.mehta@meridian.tech": { name: "Arjun Mehta", role: "recruiter", password: "Meridian@2026" },
-      "priya.nair@meridian.tech": { name: "Priya Nair", role: "ta_head", password: "Meridian@2026" },
-      "sneha.iyer@meridian.tech": { name: "Sneha Iyer", role: "recruiter", password: "Meridian@2026" },
-      "vikram.rao@meridian.tech": { name: "Vikram Rao", role: "hiring_manager", password: "Meridian@2026" }
+      "recruiter@ats.software": { name: "Recruiter", password: "Ats@2026" },
+      "admin@ats.software": { name: "Admin", password: "Ats@2026" },
+      "arjun.mehta@meridian.tech": { name: "Recruiter", password: "Meridian@2026" }
     };
-    const cands = {
-      "aditya.menon@example.com": { name: "Aditya Menon", password: "Welcome@123", apps: [["Java Full Stack Engineer", "HDFC Bank", "Client round"], ["DevOps Engineer", "Reliance Jio", "Dropped out"]] },
-      "nisha.verma@example.com": { name: "Nisha Verma", password: "Welcome@123", apps: [["React Frontend Developer", "HDFC Bank", "Internal interview"]] },
-      "kavya.reddy@example.com": { name: "Kavya Reddy", password: "Welcome@123", apps: [["Java Full Stack Engineer", "HDFC Bank", "BGV"]] }
-    };
+
+    function counts() {
+      const active = PEOPLE.filter((p) => p.outcome === "Active" || p.outcome === "Joined");
+      const by = {};
+      STAGES.forEach((s) => { by[s] = active.filter((p) => p.stage === s).length; });
+      return {
+        open: JOBS.length,
+        pipeline: PEOPLE.filter((p) => p.outcome === "Active").length,
+        offer: (by.Offered || 0) + (by.BGV || 0),
+        joined: PEOPLE.filter((p) => p.outcome === "Joined").length,
+        dropped: PEOPLE.filter((p) => p.outcome === "Dropped out").length,
+        rejected: PEOPLE.filter((p) => p.outcome === "Rejected").length,
+        by
+      };
+    }
+
+    function renderDash() {
+      const c = counts();
+      kpis.innerHTML = [
+        ["Open positions", c.open],
+        ["Candidates", PEOPLE.length],
+        ["Active pipeline", c.pipeline],
+        ["Offer / BGV", c.offer],
+        ["Joined", c.joined],
+        ["Dropped / rejected", c.dropped + c.rejected]
+      ].map(([l, v]) => '<div class="kpi"><span>' + l + "</span><strong>" + v + "</strong></div>").join("");
+      stageLine.textContent = STAGES.map((s) => s + " " + (c.by[s] || 0)).join(" · ");
+    }
+
+    function renderJobs() {
+      jobsBody.innerHTML = JOBS.map((j) =>
+        "<tr><td><strong>" + j.title + "</strong></td><td>" + j.client + '<div class="meta">' + j.project + "</div></td><td>" + j.billing + "</td><td>" + j.band + "</td><td>" + j.loc + "</td><td>" + j.close + "</td></tr>"
+      ).join("");
+    }
+
+    function renderKanban() {
+      const active = PEOPLE.filter((p) => p.outcome === "Active" || p.outcome === "Joined");
+      kanban.innerHTML = STAGES.map((s) => {
+        const items = active.filter((p) => p.stage === s);
+        return '<div class="col"><h3>' + s + ' <span class="tag">' + items.length + "</span></h3>" +
+          items.map((p) => '<div class="item"><strong>' + p.name + "</strong><div class=\"meta\">" + p.job + " · " + p.client + "</div><span class=\"tag\">" + p.source + "</span>" +
+            (p.notice >= 90 ? '<span class="tag high">' + p.notice + "d notice</span>" : "") + "</div>").join("") +
+          "</div>";
+      }).join("");
+    }
+
+    function renderCands() {
+      const q = (document.getElementById("q").value || "").toLowerCase();
+      const src = document.getElementById("src").value;
+      const rows = PEOPLE.filter((p) => {
+        const hay = [p.name, p.phone, p.email, p.company, p.skills, p.source, p.stage].join(" ").toLowerCase();
+        return (!q || hay.includes(q)) && (!src || p.source === src);
+      });
+      candCount.textContent = rows.length + " of " + PEOPLE.length + " candidates";
+      candBody.innerHTML = rows.map((p) =>
+        "<tr><td>" + p.name + "</td><td>" + p.phone + '<div class="meta">' + p.email + "</div></td><td>" + p.company + "</td><td>" + p.exp + " yrs · " + p.notice + "d</td><td>" + p.skills + "</td><td>" + p.source + "</td><td>" + p.stage + (p.outcome !== "Active" && p.outcome !== "Joined" ? " · " + p.outcome : "") + "</td></tr>"
+      ).join("");
+    }
+
+    renderDash();
+    renderJobs();
+    renderKanban();
+    renderCands();
+    document.getElementById("q").oninput = renderCands;
+    document.getElementById("src").onchange = renderCands;
+
     let portal = "staff";
     tabStaff.onclick = () => {
       portal = "staff"; tabStaff.classList.add("on"); tabCand.classList.remove("on");
-      email.value = "arjun.mehta@meridian.tech"; password.value = "Meridian@2026";
-      hint.innerHTML = "Recruiter demo: arjun.mehta@meridian.tech / Meridian@2026<br />TA Head: priya.nair@meridian.tech / Meridian@2026";
+      email.value = "recruiter@ats.software"; password.value = "Ats@2026";
+      hint.innerHTML = "Recruiter: recruiter@ats.software / Ats@2026<br />Admin: admin@ats.software / Ats@2026";
       err.textContent = "";
     };
     tabCand.onclick = () => {
       portal = "candidate"; tabCand.classList.add("on"); tabStaff.classList.remove("on");
       email.value = "aditya.menon@example.com"; password.value = "Welcome@123";
-      hint.innerHTML = "Candidate demo: aditya.menon@example.com / Welcome@123<br />nisha.verma@example.com / Welcome@123";
+      hint.innerHTML = "Any of the 220 candidate emails, password Welcome@123<br />Example: aditya.menon@example.com";
       err.textContent = "";
     };
     function show(id) {
@@ -221,23 +309,23 @@
         if (!u || u.password !== password.value) { err.textContent = "Invalid recruiter email or password"; return; }
         show("app");
       } else {
-        const c = cands[em];
+        const c = PEOPLE.find((p) => p.email === em);
         if (!c || c.password !== password.value) { err.textContent = "Invalid candidate email or password"; return; }
         candHello.textContent = "Hello, " + c.name;
-        candApps.innerHTML = c.apps.map((a) => "<tr><td>" + a[0] + "</td><td>" + a[1] + "</td><td>" + a[2] + "</td></tr>").join("");
+        candApps.innerHTML = "<tr><td>" + c.job + "</td><td>" + c.client + "</td><td>" + c.stage + " · " + c.outcome + "</td></tr>";
         show("cand");
       }
     };
     logoutStaff.onclick = logoutCand.onclick = (e) => { e.preventDefault(); show("login"); };
 
-    const pages = { dash: ["Head of TA · daily pulse", "Open hiring for 4 client projects"], jobs: ["Job requisitions", "Client-tied open positions"], pipe: ["Kanban pipeline", "Applied → Joined (client round & BGV)"], cands: ["Candidate database", "Search, source, duplicate-safe records"] };
+    const pages = { dash: ["Overview", "Hiring pipeline"], jobs: ["Requisitions", "Open positions"], pipe: ["Pipeline", "Applied → Joined"], cands: ["Database", "220 candidate records"] };
     document.querySelectorAll("#app nav a").forEach((a) => {
       a.onclick = () => {
         document.querySelectorAll("#app nav a").forEach((x) => x.classList.remove("on"));
         a.classList.add("on");
-        Object.keys(pages).forEach((id) => { document.getElementById(id).hidden = id !== a.dataset.page; });
-        document.getElementById("eyebrow").textContent = pages[a.dataset.page][0];
-        document.getElementById("title").textContent = pages[a.dataset.page][1];
+        ["dash","jobs","pipe","cands"].forEach((id) => { document.getElementById(id).hidden = id !== a.dataset.page; });
+        eyebrow.textContent = pages[a.dataset.page][0];
+        title.textContent = pages[a.dataset.page][1];
       };
     });
   </script>
