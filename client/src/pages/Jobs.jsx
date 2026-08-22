@@ -7,6 +7,8 @@ const empty = {
   client_id: "",
   project_id: "",
   skills_required: "",
+  description: "",
+  requirements: "",
   exp_min_years: 3,
   exp_max_years: 7,
   ctc_min_lpa: 12,
@@ -65,6 +67,7 @@ export default function Jobs({ meta }) {
                 <td>
                   <strong>{j.title}</strong>
                   <div className="meta">{j.skills_required}</div>
+                  {j.description && <div className="meta" style={{ marginTop: 6 }}>{j.description.slice(0, 140)}…</div>}
                 </td>
                 <td>
                   {j.client_name}
@@ -99,6 +102,12 @@ export default function Jobs({ meta }) {
               <select value={edit.project_id} onChange={(e) => setEdit({ ...edit, project_id: e.target.value })}>
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
+            </label>
+            <label className="field full">Job description
+              <textarea rows={4} value={edit.description || ""} onChange={(e) => setEdit({ ...edit, description: e.target.value })} required />
+            </label>
+            <label className="field full">Requirements (one per line)
+              <textarea rows={5} value={edit.requirements || ""} onChange={(e) => setEdit({ ...edit, requirements: e.target.value })} required />
             </label>
             <label className="field full">Skills required
               <input value={edit.skills_required} onChange={(e) => setEdit({ ...edit, skills_required: e.target.value })} required />

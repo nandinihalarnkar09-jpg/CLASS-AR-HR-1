@@ -54,24 +54,20 @@ export default function CandidatePortal({ session, onLogout }) {
       </div>
       <div className="card" style={{ marginTop: 16 }}>
         <h2>Open positions</h2>
-        <p className="meta">Apply only if you have consented to Meridian processing your data for this search.</p>
-        <table>
-          <thead><tr><th>Title</th><th>Skills</th><th>Location</th><th></th></tr></thead>
-          <tbody>
-            {jobs.map((j) => (
-              <tr key={j.id}>
-                <td>{j.title}<div className="meta">{j.client_name} · {j.exp_min_years}–{j.exp_max_years} yrs</div></td>
-                <td>{j.skills_required}</td>
-                <td>{j.location}</td>
-                <td>
-                  {j.applied
-                    ? <span className="tag ok">Applied</span>
-                    : <button className="btn small" onClick={() => apply(j.id)}>Apply</button>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <p className="meta">Apply only if you have consented to processing your data for this search.</p>
+        {jobs.map((j) => (
+          <div key={j.id} className="card" style={{ marginTop: 12, boxShadow: "none" }}>
+            <h3 style={{ marginTop: 0 }}>{j.title}</h3>
+            <p className="meta">{j.client_name} · {j.location} · {j.exp_min_years}–{j.exp_max_years} yrs</p>
+            <p>{j.description}</p>
+            <p className="meta"><strong>Requirements</strong></p>
+            <ul>{(j.requirements || "").split("\n").filter(Boolean).map((line) => <li key={line}>{line}</li>)}</ul>
+            <p className="meta">Skills: {j.skills_required}</p>
+            {j.applied
+              ? <span className="tag ok">Applied</span>
+              : <button className="btn small" onClick={() => apply(j.id)}>Apply</button>}
+          </div>
+        ))}
       </div>
     </div>
   );

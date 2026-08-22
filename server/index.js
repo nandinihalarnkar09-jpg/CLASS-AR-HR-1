@@ -128,7 +128,8 @@ app.get("/api/portal/jobs", (req, res) => {
   const c = currentCandidate(req);
   if (!c) return res.status(401).json({ error: "Please log in as a candidate" });
   const jobs = db.prepare(`
-    SELECT j.id, j.title, j.skills_required, j.exp_min_years, j.exp_max_years,
+    SELECT j.id, j.title, j.skills_required, j.description, j.requirements,
+           j.exp_min_years, j.exp_max_years,
            j.location, j.target_closure_date, cl.name AS client_name
     FROM jobs j JOIN clients cl ON cl.id = j.client_id
     WHERE j.status = 'open'
@@ -301,12 +302,14 @@ app.post("/api/jobs", (req, res) => {
   const info = db.prepare(`
     INSERT INTO jobs (
       title, client_id, project_id, skills_required, exp_min_years, exp_max_years,
-      ctc_min_lpa, ctc_max_lpa, location, target_closure_date, recruiter_id, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ctc_min_lpa, ctc_max_lpa, location, target_closure_date, recruiter_id, status,
+      description, requirements
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     b.title, b.client_id, b.project_id, b.skills_required,
     b.exp_min_years, b.exp_max_years, b.ctc_min_lpa, b.ctc_max_lpa,
-    b.location, b.target_closure_date, b.recruiter_id || user.id, b.status || "open"
+    b.location, b.target_closure_date, b.recruiter_id || user.id, b.status || "open",
+    b.description || "", b.requirements || ""
   );
   audit(user.id, "create", "job", info.lastInsertRowid, { title: b.title });
   res.status(201).json({ id: info.lastInsertRowid });
@@ -321,11 +324,12 @@ app.put("/api/jobs/:id", (req, res) => {
   db.prepare(`
     UPDATE jobs SET title=?, client_id=?, project_id=?, skills_required=?, exp_min_years=?,
       exp_max_years=?, ctc_min_lpa=?, ctc_max_lpa=?, location=?, target_closure_date=?,
-      recruiter_id=?, status=?, updated_at=datetime('now')
+      recruiter_id=?, status=?, description=?, requirements=?, updated_at=datetime('now')
     WHERE id=?
   `).run(
     b.title, b.client_id, b.project_id, b.skills_required, b.exp_min_years, b.exp_max_years,
-    b.ctc_min_lpa, b.ctc_max_lpa, b.location, b.target_closure_date, b.recruiter_id, b.status, req.params.id
+    b.ctc_min_lpa, b.ctc_max_lpa, b.location, b.target_closure_date, b.recruiter_id, b.status,
+    b.description || "", b.requirements || "", req.params.id
   );
   audit(user.id, "update", "job", Number(req.params.id), { title: b.title });
   res.json({ ok: true });

@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS jobs (
   ctc_max_lpa REAL NOT NULL,
   location TEXT NOT NULL,
   target_closure_date TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  requirements TEXT NOT NULL DEFAULT '',
   recruiter_id INTEGER REFERENCES users(id),
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'on_hold', 'closed', 'filled')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),

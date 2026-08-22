@@ -1,9 +1,58 @@
 const { openDb } = require("./db");
 const { retentionUntil } = require("./constants");
 
+const JOB_DETAILS = {
+  "Java Full Stack Engineer": {
+    description:
+      "Build and own end-to-end features on the HDFC Digital Lending Platform: REST APIs in Spring Boot, React screens for loan origination, and PostgreSQL data model changes. You will work with the client squad in Bengaluru, take part in client-round demos, and support production releases against a billed monthly rate.",
+    requirements:
+      "4–8 years in Java (17+) and Spring Boot\nHands-on React and PostgreSQL\nExperience on banking or lending systems preferred\nNotice period must fit a 15 Sep 2026 project start\nWillingness to join after BGV clearance",
+  },
+  "React Frontend Developer": {
+    description:
+      "Create accessible, tested UI for HDFC Core Banking Modernisation. You will implement TypeScript React modules, Redux state, and Jest coverage, then present builds in the internal interview and a client round with HDFC panel.",
+    requirements:
+      "3–6 years of React and TypeScript\nRedux (or equivalent) and Jest/RTL\nStrong CSS and design-system discipline\nComfortable with Hyderabad hybrid delivery\nCTC expectation within 14–22 LPA",
+  },
+  "Data Engineer": {
+    description:
+      "Design Spark/Kafka pipelines on AWS for Tata Motors Connected Vehicle Analytics. You will ingest telemetry, publish curated datasets, and support analysts. Client approval is required before offer; BGV is mandatory before joining.",
+    requirements:
+      "5–9 years in data engineering\nPython, Spark, Kafka, and AWS (S3/EMR/MSK)\nPerformance tuning on large batch/stream jobs\nAble to work from Pune with travel to client sites\nNotice period compatible with 1 Sep 2026 start",
+  },
+  "QA Automation Lead": {
+    description:
+      "Lead automation for Infosys BPM KYC Automation: framework design in Selenium/Cypress, API test packs, and a small QA pod. You will define exit criteria for client round and sign off BGV-ready releases.",
+    requirements:
+      "6–10 years in QA with 2+ years leading automation\nJava, Selenium, Cypress, REST API testing\nCI integration (Jenkins/GitHub Actions)\nChennai-based or ready to relocate\nExperience in BFSI/KYC is a plus",
+  },
+  "DevOps Engineer": {
+    description:
+      "Run Kubernetes, Terraform, and Jenkins for Reliance Jio 5G OSS support. You will own environments, deployment pipelines, and on-call for billed production windows. Client round with Jio OSS stakeholders is required.",
+    requirements:
+      "4–7 years DevOps/SRE\nKubernetes, Terraform, Jenkins, AWS\nLinux, networking, and observability (Prometheus/Grafana)\nMumbai location preferred\n90-day notice only if project start can slip; 25 Aug start is tight",
+  },
+  "Business Analyst — Collections": {
+    description:
+      "Translate Mahindra Finance Collections Transformation needs into user stories, SQL-backed reports, and UAT scripts. You will sit with operations SMEs, facilitate internal and client workshops, and track drop-off between offer and joining.",
+    requirements:
+      "5–8 years BA experience, ideally BFSI collections\nSQL, Jira, and stakeholder management\nAbility to write clear acceptance criteria\nMumbai-based\nComfortable with a 20 Oct 2026 programme start",
+  },
+};
+
+function applyJobDetails(db) {
+  const upd = db.prepare("UPDATE jobs SET description = ?, requirements = ? WHERE title = ?");
+  for (const [title, d] of Object.entries(JOB_DETAILS)) {
+    upd.run(d.description, d.requirements, title);
+  }
+}
+
 function seed(db) {
   const count = db.prepare("SELECT COUNT(*) AS n FROM users").get().n;
-  if (count > 0) return;
+  if (count > 0) {
+    applyJobDetails(db);
+    return;
+  }
 
   const insertUser = db.prepare(
     "INSERT INTO users (name, email, role) VALUES (?, ?, ?)"
@@ -45,39 +94,52 @@ function seed(db) {
   const insertJob = db.prepare(`
     INSERT INTO jobs (
       title, client_id, project_id, skills_required, exp_min_years, exp_max_years,
-      ctc_min_lpa, ctc_max_lpa, location, target_closure_date, recruiter_id, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ctc_min_lpa, ctc_max_lpa, location, target_closure_date, recruiter_id, status,
+      description, requirements
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertJob.run(
     "Java Full Stack Engineer",
     1, 1, "Java, Spring Boot, React, PostgreSQL",
-    4, 8, 18, 28, "Bengaluru", "2026-09-10", 2, "open"
+    4, 8, 18, 28, "Bengaluru", "2026-09-10", 2, "open",
+    JOB_DETAILS["Java Full Stack Engineer"].description,
+    JOB_DETAILS["Java Full Stack Engineer"].requirements
   );
   insertJob.run(
     "React Frontend Developer",
     1, 2, "React, TypeScript, Redux, Jest",
-    3, 6, 14, 22, "Hyderabad", "2026-09-20", 3, "open"
+    3, 6, 14, 22, "Hyderabad", "2026-09-20", 3, "open",
+    JOB_DETAILS["React Frontend Developer"].description,
+    JOB_DETAILS["React Frontend Developer"].requirements
   );
   insertJob.run(
     "Data Engineer",
     2, 3, "Python, Spark, Kafka, AWS",
-    5, 9, 20, 32, "Pune", "2026-08-28", 2, "open"
+    5, 9, 20, 32, "Pune", "2026-08-28", 2, "open",
+    JOB_DETAILS["Data Engineer"].description,
+    JOB_DETAILS["Data Engineer"].requirements
   );
   insertJob.run(
     "QA Automation Lead",
     3, 4, "Selenium, Cypress, Java, API Testing",
-    6, 10, 16, 24, "Chennai", "2026-10-15", 4, "open"
+    6, 10, 16, 24, "Chennai", "2026-10-15", 4, "open",
+    JOB_DETAILS["QA Automation Lead"].description,
+    JOB_DETAILS["QA Automation Lead"].requirements
   );
   insertJob.run(
     "DevOps Engineer",
     4, 5, "Kubernetes, Terraform, Jenkins, AWS",
-    4, 7, 18, 26, "Mumbai", "2026-08-22", 5, "open"
+    4, 7, 18, 26, "Mumbai", "2026-08-22", 5, "open",
+    JOB_DETAILS["DevOps Engineer"].description,
+    JOB_DETAILS["DevOps Engineer"].requirements
   );
   insertJob.run(
     "Business Analyst — Collections",
     5, 6, "BFSI, SQL, Jira, Stakeholder Mgmt",
-    5, 8, 15, 22, "Mumbai", "2026-10-01", 3, "open"
+    5, 8, 15, 22, "Mumbai", "2026-10-01", 3, "open",
+    JOB_DETAILS["Business Analyst — Collections"].description,
+    JOB_DETAILS["Business Analyst — Collections"].requirements
   );
 
   const insertCand = db.prepare(`
@@ -163,6 +225,7 @@ function seed(db) {
     INSERT INTO offers (application_id, offered_ctc_lpa, joining_date, status, created_by)
     VALUES (4, 24, '2026-09-01', 'accepted', 2)
   `).run();
+  applyJobDetails(db);
 }
 
 if (require.main === module) {

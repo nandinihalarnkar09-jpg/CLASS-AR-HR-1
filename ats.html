@@ -102,12 +102,7 @@
       </section>
 
       <section id="jobs" hidden>
-        <div class="card" style="margin-top:18px">
-          <table>
-            <thead><tr><th>Title</th><th>Client / project</th><th>Billing</th><th>Band</th><th>Location</th><th>Close by</th></tr></thead>
-            <tbody id="jobsBody"></tbody>
-          </table>
-        </div>
+        <div id="jobsList" style="margin-top:18px;display:grid;gap:14px"></div>
       </section>
 
       <section id="pipe" hidden>
@@ -152,24 +147,42 @@
     <main class="main">
       <p class="eyebrow">Candidate portal</p>
       <h1 id="candHello">Hello</h1>
-      <div class="card">
-        <h2>My applications</h2>
-        <table>
-          <thead><tr><th>Role</th><th>Client</th><th>Stage</th></tr></thead>
-          <tbody id="candApps"></tbody>
-        </table>
-      </div>
+      <div class="card" id="candJobCard" style="margin-top:16px"></div>
     </main>
   </div>
 
   <script>
     const JOBS = [
-      { title: "Java Full Stack Engineer", client: "HDFC Bank", project: "Digital Lending", billing: "₹185k / mo", band: "4–8 yrs · 18–28 LPA", loc: "Bengaluru", close: "2026-09-10" },
-      { title: "React Frontend Developer", client: "HDFC Bank", project: "Core Banking", billing: "₹185k / mo", band: "3–6 yrs · 14–22 LPA", loc: "Hyderabad", close: "2026-09-20" },
-      { title: "Data Engineer", client: "Tata Motors", project: "Connected Vehicle", billing: "₹165k / mo", band: "5–9 yrs · 20–32 LPA", loc: "Pune", close: "2026-08-28" },
-      { title: "QA Automation Lead", client: "Infosys BPM", project: "KYC Automation", billing: "₹140k / mo", band: "6–10 yrs · 16–24 LPA", loc: "Chennai", close: "2026-10-15" },
-      { title: "DevOps Engineer", client: "Reliance Jio", project: "5G OSS", billing: "₹175k / mo", band: "4–7 yrs · 18–26 LPA", loc: "Mumbai", close: "2026-08-22" },
-      { title: "Business Analyst", client: "Mahindra Finance", project: "Collections", billing: "₹150k / mo", band: "5–8 yrs · 15–22 LPA", loc: "Mumbai", close: "2026-10-01" }
+      {
+        title: "Java Full Stack Engineer", client: "HDFC Bank", project: "Digital Lending", billing: "₹185k / mo", band: "4–8 yrs · 18–28 LPA", loc: "Bengaluru", close: "2026-09-10",
+        description: "Build and own end-to-end features on the Digital Lending Platform: REST APIs in Spring Boot, React screens for loan origination, and PostgreSQL data model changes. You will work with the client squad, take part in client-round demos, and support production releases.",
+        requirements: ["4–8 years in Java (17+) and Spring Boot", "Hands-on React and PostgreSQL", "Experience on banking or lending systems preferred", "Notice period must fit a 15 Sep 2026 project start", "Willingness to join after BGV clearance"]
+      },
+      {
+        title: "React Frontend Developer", client: "HDFC Bank", project: "Core Banking", billing: "₹185k / mo", band: "3–6 yrs · 14–22 LPA", loc: "Hyderabad", close: "2026-09-20",
+        description: "Create accessible, tested UI for Core Banking Modernisation. Implement TypeScript React modules, Redux state, and Jest coverage, then present builds in the internal interview and a client round.",
+        requirements: ["3–6 years of React and TypeScript", "Redux (or equivalent) and Jest/RTL", "Strong CSS and design-system discipline", "Comfortable with Hyderabad hybrid delivery", "CTC expectation within 14–22 LPA"]
+      },
+      {
+        title: "Data Engineer", client: "Tata Motors", project: "Connected Vehicle", billing: "₹165k / mo", band: "5–9 yrs · 20–32 LPA", loc: "Pune", close: "2026-08-28",
+        description: "Design Spark/Kafka pipelines on AWS for Connected Vehicle Analytics. Ingest telemetry, publish curated datasets, and support analysts. Client approval is required before offer; BGV is mandatory before joining.",
+        requirements: ["5–9 years in data engineering", "Python, Spark, Kafka, and AWS (S3/EMR/MSK)", "Performance tuning on large batch/stream jobs", "Able to work from Pune with travel to client sites", "Notice period compatible with 1 Sep 2026 start"]
+      },
+      {
+        title: "QA Automation Lead", client: "Infosys BPM", project: "KYC Automation", billing: "₹140k / mo", band: "6–10 yrs · 16–24 LPA", loc: "Chennai", close: "2026-10-15",
+        description: "Lead automation for KYC Automation: framework design in Selenium/Cypress, API test packs, and a small QA pod. Define exit criteria for client round and sign off BGV-ready releases.",
+        requirements: ["6–10 years in QA with 2+ years leading automation", "Java, Selenium, Cypress, REST API testing", "CI integration (Jenkins/GitHub Actions)", "Chennai-based or ready to relocate", "Experience in BFSI/KYC is a plus"]
+      },
+      {
+        title: "DevOps Engineer", client: "Reliance Jio", project: "5G OSS", billing: "₹175k / mo", band: "4–7 yrs · 18–26 LPA", loc: "Mumbai", close: "2026-08-22",
+        description: "Run Kubernetes, Terraform, and Jenkins for 5G OSS support. Own environments, deployment pipelines, and on-call for production windows. Client round with OSS stakeholders is required.",
+        requirements: ["4–7 years DevOps/SRE", "Kubernetes, Terraform, Jenkins, AWS", "Linux, networking, and observability (Prometheus/Grafana)", "Mumbai location preferred", "Notice period must fit a 25 Aug project start"]
+      },
+      {
+        title: "Business Analyst", client: "Mahindra Finance", project: "Collections", billing: "₹150k / mo", band: "5–8 yrs · 15–22 LPA", loc: "Mumbai", close: "2026-10-01",
+        description: "Translate Collections Transformation needs into user stories, SQL-backed reports, and UAT scripts. Sit with operations SMEs, facilitate internal and client workshops, and track drop-off between offer and joining.",
+        requirements: ["5–8 years BA experience, ideally BFSI collections", "SQL, Jira, and stakeholder management", "Ability to write clear acceptance criteria", "Mumbai-based", "Comfortable with a 20 Oct 2026 programme start"]
+      }
     ];
     const STAGES = ["Applied", "Screened", "Internal Interview", "Client Round", "Offered", "BGV", "Joined"];
     const FIRST = ["Aditya","Nisha","Farhan","Kavya","Rahul","Pooja","Siddharth","Anjali","Varun","Divya","Ishita","Mohammed","Karan","Meera","Rohit","Sneha","Arjun","Priya","Vikram","Ananya","Harsh","Neha","Aman","Shreya","Nikhil","Tanvi","Abhishek","Ritika","Saurabh","Diya","Yash","Kritika","Manish","Pallavi","Deepak","Aisha","Gaurav","Sanya","Ravi","Isha","Akash","Nandini","Vivek","Simran","Pranav","Aarohi","Kunal","Jhanvi","Omkar","Trisha","Dev","Mira","Sagar","Lavanya","Nitin","Bhavna","Ashwin","Esha","Parth","Rhea"];
@@ -248,8 +261,11 @@
     }
 
     function renderJobs() {
-      jobsBody.innerHTML = JOBS.map((j) =>
-        "<tr><td><strong>" + j.title + "</strong></td><td>" + j.client + '<div class="meta">' + j.project + "</div></td><td>" + j.billing + "</td><td>" + j.band + "</td><td>" + j.loc + "</td><td>" + j.close + "</td></tr>"
+      jobsList.innerHTML = JOBS.map((j) =>
+        '<div class="card"><h2 style="margin-top:0">' + j.title + "</h2>" +
+        '<p class="meta">' + j.client + " · " + j.project + " · " + j.loc + " · " + j.band + " · close " + j.close + " · " + j.billing + "</p>" +
+        "<h3>Job description</h3><p>" + j.description + "</p>" +
+        "<h3>Requirements</h3><ul>" + j.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul></div>"
       ).join("");
     }
 
@@ -312,7 +328,10 @@
         const c = PEOPLE.find((p) => p.email === em);
         if (!c || c.password !== password.value) { err.textContent = "Invalid candidate email or password"; return; }
         candHello.textContent = "Hello, " + c.name;
-        candApps.innerHTML = "<tr><td>" + c.job + "</td><td>" + c.client + "</td><td>" + c.stage + " · " + c.outcome + "</td></tr>";
+        const job = JOBS.find((j) => j.title === c.job) || JOBS[0];
+        candJobCard.innerHTML = "<h2 style=\"margin-top:0\">My application</h2><p><strong>" + job.title + "</strong> · " + job.client + " · " + c.stage + " · " + c.outcome + "</p>" +
+          "<h3>Job description</h3><p>" + job.description + "</p>" +
+          "<h3>Requirements</h3><ul>" + job.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul>";
         show("cand");
       }
     };
