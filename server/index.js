@@ -68,11 +68,128 @@ function noticeRisk(noticeDays, projectStart) {
   return { level: "low", untilStart };
 }
 
+app.use("/api", (req, res, next) => {
+  if (req.path.startsWith("/auth") || req.path.startsWith("/portal")) return next();
+  if (req.header("x-auth-role") === "candidate") {
+    return res.status(403).json({ error: "This area is for recruiters and hiring managers only" });
+  }
+  next();
+});
+
+app.get("/api/auth/demo-accounts", (_req, res) => {
+  res.json({
+    staffPassword: "Meridian@2026",
+    candidatePassword: "Welcome@123",
+    staff: db.prepare("SELECT name, email, role FROM users ORDER BY id").all(),
+    candidates: db.prepare("SELECT name, email, phone FROM candidates ORDER BY id LIMIT 8").all(),
+  });
+});
+
+app.post("/api/auth/login", (req, res) => {
+  const portal = req.body.portal === "candidate" ? "candidate" : "staff";
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const password = String(req.body.password || "");
+  if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+
+  if (portal === "staff") {
+    const user = db.prepare("SELECT * FROM users WHERE lower(email) = ?").get(email);
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid recruiter email or password" });
+    }
+    audit(user.id, "login", "user", user.id, { portal: "staff" });
+    return res.json({
+      type: "staff",
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+  }
+
+  const candidate = db.prepare("SELECT * FROM candidates WHERE lower(email) = ?").get(email);
+  if (!candidate || candidate.portal_password !== password) {
+    return res.status(401).json({ error: "Invalid candidate email or password" });
+  }
+  audit(null, "login", "candidate", candidate.id, { portal: "candidate" });
+  return res.json({
+    type: "candidate",
+    candidate: {
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      phone: candidate.phone,
+    },
+  });
+});
+
+function currentCandidate(req) {
+  const id = Number(req.header("x-candidate-id") || 0);
+  return db.prepare("SELECT * FROM candidates WHERE id = ?").get(id);
+}
+
+app.get("/api/portal/jobs", (req, res) => {
+  const c = currentCandidate(req);
+  if (!c) return res.status(401).json({ error: "Please log in as a candidate" });
+  const jobs = db.prepare(`
+    SELECT j.id, j.title, j.skills_required, j.exp_min_years, j.exp_max_years,
+           j.location, j.target_closure_date, cl.name AS client_name
+    FROM jobs j JOIN clients cl ON cl.id = j.client_id
+    WHERE j.status = 'open'
+    ORDER BY j.target_closure_date
+  `).all();
+  const applied = new Set(
+    db.prepare("SELECT job_id FROM applications WHERE candidate_id = ?").all(c.id).map((r) => r.job_id)
+  );
+  res.json(jobs.map((j) => ({ ...j, applied: applied.has(j.id) })));
+});
+
+app.get("/api/portal/me", (req, res) => {
+  const c = currentCandidate(req);
+  if (!c) return res.status(401).json({ error: "Please log in as a candidate" });
+  audit(null, "read", "candidate_portal", c.id, {});
+  const applications = db.prepare(`
+    SELECT a.id, a.stage, a.outcome, a.joining_date, a.reject_reason_code,
+           j.title AS job_title, j.location, cl.name AS client_name
+    FROM applications a
+    JOIN jobs j ON j.id = a.job_id
+    JOIN clients cl ON cl.id = j.client_id
+    WHERE a.candidate_id = ?
+    ORDER BY a.updated_at DESC
+  `).all(c.id);
+  res.json({
+    candidate: {
+      id: c.id,
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      notice_period_days: c.notice_period_days,
+      skills: c.skills,
+    },
+    applications: applications.map((a) => ({ ...a, stage_label: STAGE_LABELS[a.stage] })),
+    stageLabels: STAGE_LABELS,
+  });
+});
+
+app.post("/api/portal/apply", (req, res) => {
+  const c = currentCandidate(req);
+  if (!c) return res.status(401).json({ error: "Please log in as a candidate" });
+  const jobId = Number(req.body.job_id);
+  const job = db.prepare("SELECT * FROM jobs WHERE id = ? AND status = 'open'").get(jobId);
+  if (!job) return res.status(404).json({ error: "Job not found" });
+  const existing = db.prepare("SELECT * FROM applications WHERE candidate_id=? AND job_id=?").get(c.id, jobId);
+  if (existing) return res.status(409).json({ error: "You have already applied to this role" });
+  const info = db.prepare(
+    "INSERT INTO applications (candidate_id, job_id, stage, outcome) VALUES (?, ?, 'applied', 'active')"
+  ).run(c.id, jobId);
+  db.prepare(
+    "INSERT INTO stage_history (application_id, from_stage, to_stage, outcome, moved_by, note) VALUES (?, NULL, 'applied', 'active', NULL, ?)"
+  ).run(info.lastInsertRowid, "Candidate self-apply");
+  audit(null, "create", "application", info.lastInsertRowid, { candidate_id: c.id, job_id: jobId, source: "portal" });
+  res.status(201).json({ id: info.lastInsertRowid });
+});
+
 app.get("/api/meta", (req, res) => {
   const user = currentUser(req);
   audit(user.id, "read", "meta", null, { route: "/api/meta" });
   res.json({
-    user,
+    user: { id: user.id, name: user.name, email: user.email, role: user.role },
     stages: STAGES,
     stageLabels: STAGE_LABELS,
     rejectReasons: REJECT_REASONS,

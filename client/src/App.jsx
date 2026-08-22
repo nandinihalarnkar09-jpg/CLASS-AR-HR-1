@@ -1,27 +1,71 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api, getUserId, setUserId } from "./api";
+import { api, getSession, clearSession, isDemoMode } from "./api";
 import Dashboard from "./pages/Dashboard.jsx";
 import Jobs from "./pages/Jobs.jsx";
 import Pipeline from "./pages/Pipeline.jsx";
 import Candidates from "./pages/Candidates.jsx";
 import CandidateDetail from "./pages/CandidateDetail.jsx";
 import Audit from "./pages/Audit.jsx";
+import Login from "./pages/Login.jsx";
+import CandidatePortal from "./pages/CandidatePortal.jsx";
 
 export default function App() {
+  const [session, setSessionState] = useState(getSession());
   const [meta, setMeta] = useState(null);
-  const [userId, setUid] = useState(getUserId());
+  const [bootError, setBootError] = useState("");
 
   useEffect(() => {
-    api.meta().then(setMeta).catch(console.error);
-  }, [userId]);
+    if (!session || session.type !== "staff") {
+      setMeta(null);
+      return;
+    }
+    api
+      .meta()
+      .then(setMeta)
+      .catch((e) => setBootError(e.message || "Could not start"));
+  }, [session]);
 
-  function switchUser(id) {
-    setUserId(id);
-    setUid(Number(id));
-    window.location.reload();
+  function logout() {
+    clearSession();
+    setSessionState(null);
+    setMeta(null);
   }
 
+  if (!session) {
+    return <Login onLoggedIn={(s) => setSessionState(s)} />;
+  }
+
+  if (session.type === "candidate") {
+    return (
+      <div className="app">
+        <aside className="sidebar">
+          <div className="logo">
+            <div className="logo-mark">M</div>
+            <div className="brand-type">Meridian ATS</div>
+            <small>Candidate portal</small>
+          </div>
+          <nav className="nav">
+            <span className="nav a" style={{ display: "block", padding: "10px 12px" }}>My status</span>
+          </nav>
+          <button className="btn secondary" onClick={logout} style={{ marginTop: "auto" }}>Log out</button>
+        </aside>
+        <main className="main">
+          <CandidatePortal session={session} onLogout={logout} />
+        </main>
+      </div>
+    );
+  }
+
+  if (bootError) {
+    return (
+      <div className="main">
+        <h1>Meridian ATS did not start</h1>
+        <p>{bootError}</p>
+        <button className="btn" onClick={logout}>Back to login</button>
+      </div>
+    );
+  }
   if (!meta) return <div className="main">Loading Meridian ATS…</div>;
 
   return (
@@ -30,7 +74,7 @@ export default function App() {
         <div className="logo">
           <div className="logo-mark">M</div>
           <div className="brand-type">Meridian ATS</div>
-          <small>Talent · DPDP v1</small>
+          <small>Talent · DPDP v1{isDemoMode() ? " · browser demo" : ""}</small>
         </div>
         <nav className="nav">
           <NavLink to="/">Dashboard</NavLink>
@@ -41,13 +85,9 @@ export default function App() {
         </nav>
         <div className="user-switch">
           <label>Signed in as</label>
-          <select value={userId} onChange={(e) => switchUser(e.target.value)}>
-            {meta.users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name} · {u.role.replace("_", " ")}
-              </option>
-            ))}
-          </select>
+          <div style={{ marginTop: 8, color: "#eadfce" }}>{meta.user.name}</div>
+          <div className="meta" style={{ color: "#cbbfae" }}>{meta.user.role.replace("_", " ")}</div>
+          <button className="btn secondary" style={{ marginTop: 12, width: "100%" }} onClick={logout}>Log out</button>
         </div>
       </aside>
       <main className="main">

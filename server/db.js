@@ -18,7 +18,21 @@ function openDb() {
   db.pragma("foreign_keys = ON");
   const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
   db.exec(schema);
+  migrate(db);
   return db;
+}
+
+function columnNames(db, table) {
+  return db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name);
+}
+
+function migrate(db) {
+  if (!columnNames(db, "users").includes("password")) {
+    db.exec("ALTER TABLE users ADD COLUMN password TEXT NOT NULL DEFAULT 'Meridian@2026'");
+  }
+  if (!columnNames(db, "candidates").includes("portal_password")) {
+    db.exec("ALTER TABLE candidates ADD COLUMN portal_password TEXT NOT NULL DEFAULT 'Welcome@123'");
+  }
 }
 
 module.exports = { openDb, DATA_DIR, UPLOAD_DIR, DB_PATH };

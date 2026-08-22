@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   role TEXT NOT NULL CHECK (role IN ('recruiter', 'ta_head', 'hiring_manager')),
+  password TEXT NOT NULL DEFAULT 'Meridian@2026',
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS candidates (
   referred_by TEXT,
   resume_path TEXT,
   resume_original_name TEXT,
+  portal_password TEXT NOT NULL DEFAULT 'Welcome@123',
   consent_given INTEGER NOT NULL DEFAULT 0,
   consent_at TEXT,
   consent_purpose TEXT DEFAULT 'Recruitment for client-delivery roles at Meridian Technologies',
