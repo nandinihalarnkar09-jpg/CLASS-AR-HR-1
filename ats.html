@@ -47,7 +47,15 @@
     input { border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px; font: inherit; }
     .btn { background: var(--side); color: #fff; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; font: inherit; }
     .btn.full { width: 100%; margin-top: 16px; }
+    .btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
     .hint { font-size: 13px; color: var(--muted); margin-top: 18px; }
+    .modal-back { position: fixed; inset: 0; background: rgba(15,23,36,.5); display: none; place-items: center; z-index: 40; padding: 16px; }
+    .modal-back.open { display: grid; }
+    .modal { background: #fff; max-width: 760px; width: 100%; max-height: 92vh; overflow: auto; border-radius: 14px; padding: 22px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-grid label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); }
+    .form-grid input, .form-grid select, .form-grid textarea { border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px; font: inherit; width: 100%; }
     #app, #cand { display: none; }
     @media (max-width: 900px) {
       .app, .login-shell { grid-template-columns: 1fr; }
@@ -157,6 +165,74 @@
     </main>
   </div>
 
+  <div id="applyModal" class="modal-back">
+    <div class="modal">
+      <p class="eyebrow">Application form</p>
+      <h2 id="applyTitle" style="margin-top:0">Apply</h2>
+      <p class="meta" id="applyMeta"></p>
+      <form id="applyForm" class="form-grid">
+        <label>Full name <input name="full_name" required /></label>
+        <label>Phone <input name="phone" required /></label>
+        <label>Email <input name="email" type="email" required /></label>
+        <label>Current city <input name="city" required /></label>
+        <label>Highest qualification
+          <select name="qualification" required>
+            <option value="">Select</option>
+            <option>B.E / B.Tech</option>
+            <option>M.E / M.Tech</option>
+            <option>MCA / M.Sc</option>
+            <option>MBA</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Total experience (years) <input name="experience" type="number" step="0.1" min="0" required /></label>
+        <label>Current company <input name="current_company" /></label>
+        <label>Current CTC (LPA) <input name="current_ctc" type="number" step="0.1" /></label>
+        <label>Expected CTC (LPA) <input name="expected_ctc" type="number" step="0.1" required /></label>
+        <label>Notice period (days) <input name="notice" type="number" min="0" required /></label>
+        <label>LinkedIn / portfolio URL <input name="linkedin" type="url" placeholder="https://" /></label>
+        <label class="full">Attach CV (PDF, required)
+          <input name="cv" type="file" accept=".pdf,application/pdf" required />
+        </label>
+        <label class="full">Attach cover letter (PDF, optional)
+          <input name="cover_letter" type="file" accept=".pdf,.doc,.docx,application/pdf" />
+        </label>
+        <label class="full">Other documents (education, relieving letter, optional)
+          <input name="other_docs" type="file" accept=".pdf,.doc,.docx,image/*" multiple />
+        </label>
+        <label>Are you serving notice now?
+          <select name="serving_notice" required><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>Willing to work from this job location / relocate?
+          <select name="relocate" required><option value="">Select</option><option>Yes</option><option>No</option><option>Already in this city</option></select>
+        </label>
+        <label>Holding any other offers?
+          <select name="other_offers" required><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>Willing to attend a client interview round?
+          <select name="client_round" required><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>Consent to background verification (BGV) before joining?
+          <select name="bgv" required><option value="">Select</option><option>Yes</option><option>No</option></select>
+        </label>
+        <label>Earliest joining date <input name="joining" type="date" required /></label>
+        <label class="full"><span id="roleQLabel">Role-specific question</span>
+          <input name="role_answer" required />
+        </label>
+        <label class="full">Why are you a fit for this job? <textarea name="why_fit" rows="3" required></textarea></label>
+        <label class="full">
+          <span><input name="consent" type="checkbox" required /> I consent to ATS software processing this application (name, contact, employment, documents) only for recruitment.</span>
+        </label>
+        <div class="full" style="display:flex;gap:8px">
+          <button class="btn" type="submit">Submit application</button>
+          <button class="btn secondary" type="button" id="applyCancel">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+    </main>
+  </div>
+
   <script>
     const JOBS = [
       {
@@ -164,42 +240,48 @@
         description: "Build and own end-to-end features on the Digital Lending Platform: REST APIs in Spring Boot, React screens for loan origination, and PostgreSQL data model changes. You will work with the client squad, take part in client-round demos, and support production releases.",
         requirements: ["4–8 years in Java (17+) and Spring Boot", "Hands-on React and PostgreSQL", "Experience on banking or lending systems preferred", "Notice period must fit a 15 Sep 2026 project start", "Willingness to join after BGV clearance"],
         pay: "₹18–28 LPA CTC (about 80% fixed + 20% variable). Joining bonus ₹1,00,000 after 90 days in employment.",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater + personal accident cover", "Hybrid: 8 office / 12 WFH days per month after probation", "₹25,000 annual learning budget and certification support", "Relocation assistance up to ₹50,000 for Bengaluru joins"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater + personal accident cover", "Hybrid: 8 office / 12 WFH days per month after probation", "₹25,000 annual learning budget and certification support", "Relocation assistance up to ₹50,000 for Bengaluru joins"],
+        roleQuestion: "How many years have you built production Spring Boot + React applications?"
       },
       {
         title: "React Frontend Developer", client: "HDFC Bank", project: "Core Banking", billing: "₹185k / mo", band: "3–6 yrs · 14–22 LPA", loc: "Hyderabad", close: "2026-09-20",
         description: "Create accessible, tested UI for Core Banking Modernisation. Implement TypeScript React modules, Redux state, and Jest coverage, then present builds in the internal interview and a client round.",
         requirements: ["3–6 years of React and TypeScript", "Redux (or equivalent) and Jest/RTL", "Strong CSS and design-system discipline", "Comfortable with Hyderabad hybrid delivery", "CTC expectation within 14–22 LPA"],
         pay: "₹14–22 LPA CTC (85% fixed + 15% variable). Review at 12 months.",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Hyderabad hybrid (3 days office)", "Internet stipend ₹1,500/month", "₹20,000 annual learning budget"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Hyderabad hybrid (3 days office)", "Internet stipend ₹1,500/month", "₹20,000 annual learning budget"],
+        roleQuestion: "Have you shipped production TypeScript React apps with Jest tests? Describe one."
       },
       {
         title: "Data Engineer", client: "Tata Motors", project: "Connected Vehicle", billing: "₹165k / mo", band: "5–9 yrs · 20–32 LPA", loc: "Pune", close: "2026-08-28",
         description: "Design Spark/Kafka pipelines on AWS for Connected Vehicle Analytics. Ingest telemetry, publish curated datasets, and support analysts. Client approval is required before offer; BGV is mandatory before joining.",
         requirements: ["5–9 years in data engineering", "Python, Spark, Kafka, and AWS (S3/EMR/MSK)", "Performance tuning on large batch/stream jobs", "Able to work from Pune with travel to client sites", "Notice period compatible with 1 Sep 2026 start"],
         pay: "₹20–32 LPA CTC (80% fixed + 20% variable). Spot bonus for on-time pipeline go-live.",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹7.5 lakh floater", "Pune office + client travel reimbursed at actuals", "₹30,000 annual cloud certification budget", "Term life cover 3× CTC"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹7.5 lakh floater", "Pune office + client travel reimbursed at actuals", "₹30,000 annual cloud certification budget", "Term life cover 3× CTC"],
+        roleQuestion: "Which AWS + Spark/Kafka pipelines have you owned in production?"
       },
       {
         title: "QA Automation Lead", client: "Infosys BPM", project: "KYC Automation", billing: "₹140k / mo", band: "6–10 yrs · 16–24 LPA", loc: "Chennai", close: "2026-10-15",
         description: "Lead automation for KYC Automation: framework design in Selenium/Cypress, API test packs, and a small QA pod. Define exit criteria for client round and sign off BGV-ready releases.",
         requirements: ["6–10 years in QA with 2+ years leading automation", "Java, Selenium, Cypress, REST API testing", "CI integration (Jenkins/GitHub Actions)", "Chennai-based or ready to relocate", "Experience in BFSI/KYC is a plus"],
         pay: "₹16–24 LPA CTC (80% fixed + 20% variable). Team-lead allowance ₹15,000/month after confirmation.",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Relocation to Chennai up to ₹40,000", "₹25,000 learning budget", "12 casual + 12 earned leave"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Relocation to Chennai up to ₹40,000", "₹25,000 learning budget", "12 casual + 12 earned leave"],
+        roleQuestion: "What automation framework (Selenium/Cypress) did you last lead, and for how many testers?"
       },
       {
         title: "DevOps Engineer", client: "Reliance Jio", project: "5G OSS", billing: "₹175k / mo", band: "4–7 yrs · 18–26 LPA", loc: "Mumbai", close: "2026-08-22",
         description: "Run Kubernetes, Terraform, and Jenkins for 5G OSS support. Own environments, deployment pipelines, and on-call for production windows. Client round with OSS stakeholders is required.",
         requirements: ["4–7 years DevOps/SRE", "Kubernetes, Terraform, Jenkins, AWS", "Linux, networking, and observability (Prometheus/Grafana)", "Mumbai location preferred", "Notice period must fit a 25 Aug project start"],
         pay: "₹18–26 LPA CTC (75% fixed + 25% variable tied to uptime SLAs). On-call stipend ₹8,000/month.",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh + accident cover for on-call staff", "Meal coupons ₹2,200/month", "₹30,000 CKA/CKS certification support", "Comp-off for weekend production windows"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh + accident cover for on-call staff", "Meal coupons ₹2,200/month", "₹30,000 CKA/CKS certification support", "Comp-off for weekend production windows"],
+        roleQuestion: "Describe a Kubernetes/Terraform production incident you resolved."
       },
       {
         title: "Business Analyst", client: "Mahindra Finance", project: "Collections", billing: "₹150k / mo", band: "5–8 yrs · 15–22 LPA", loc: "Mumbai", close: "2026-10-01",
         description: "Translate Collections Transformation needs into user stories, SQL-backed reports, and UAT scripts. Sit with operations SMEs, facilitate internal and client workshops, and track drop-off between offer and joining.",
         requirements: ["5–8 years BA experience, ideally BFSI collections", "SQL, Jira, and stakeholder management", "Ability to write clear acceptance criteria", "Mumbai-based", "Comfortable with a 20 Oct 2026 programme start"],
         pay: "₹15–22 LPA CTC (90% fixed + 10% variable).",
-        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Mumbai 3+2 hybrid after workshops", "LTA as per IT rules", "₹15,000 domain course support"]
+        benefits: ["PF and gratuity as per Indian law", "Family mediclaim ₹5 lakh floater", "Mumbai 3+2 hybrid after workshops", "LTA as per IT rules", "₹15,000 domain course support"],
+        roleQuestion: "Give an example of a BFSI collections process you mapped into user stories."
       }
     ];
     const STAGES = ["Applied", "Screened", "Internal Interview", "Client Round", "Offered", "BGV", "Joined"];
@@ -362,20 +444,63 @@
               "<h3>Requirements</h3><ul>" + j.requirements.map((r) => "<li>" + r + "</li>").join("") + "</ul>" +
               "<h3>Pay</h3><p>" + j.pay + "</p>" +
               "<h3>Benefits the company provides</h3><ul>" + j.benefits.map((r) => "<li>" + r + "</li>").join("") + "</ul>" +
-              (isOn ? '<span class="tag">Applied</span>' : '<button class="btn" data-job="' + j.title.replace(/"/g, "") + '">Apply to this job</button>') +
+              (isOn ? '<span class="tag">Applied</span>' : '<button class="btn" type="button" data-idx="' + JOBS.indexOf(j) + '">Apply to this job</button>') +
               "</div>";
           }).join("");
-          candOpenJobs.querySelectorAll("button[data-job]").forEach((btn) => {
-            btn.onclick = () => {
-              applied.add(btn.getAttribute("data-job"));
-              localStorage.setItem(appliedKey, JSON.stringify([...applied]));
-              drawOpen();
-            };
+          candOpenJobs.querySelectorAll("button[data-idx]").forEach((btn) => {
+            btn.onclick = () => openApply(Number(btn.getAttribute("data-idx")), c, applied, appliedKey, drawOpen);
           });
         }
         drawOpen();
         show("cand");
       }
+    };
+
+    let pendingApply = null;
+    function openApply(idx, candidate, applied, appliedKey, redraw) {
+      const j = JOBS[idx];
+      pendingApply = { idx, candidate, applied, appliedKey, redraw, job: j };
+      applyTitle.textContent = "Apply — " + j.title;
+      applyMeta.textContent = j.client + " · " + j.loc + " · " + j.band;
+      applyForm.reset();
+      applyForm.full_name.value = candidate.name;
+      applyForm.phone.value = candidate.phone;
+      applyForm.email.value = candidate.email;
+      applyForm.experience.value = candidate.exp;
+      applyForm.current_company.value = candidate.company;
+      applyForm.notice.value = candidate.notice;
+      roleQLabel.textContent = j.roleQuestion;
+      applyModal.classList.add("open");
+    }
+    applyCancel.onclick = () => applyModal.classList.remove("open");
+    applyForm.onsubmit = (e) => {
+      e.preventDefault();
+      if (!pendingApply) return;
+      const cv = applyForm.cv.files[0];
+      if (!cv || !/\.pdf$/i.test(cv.name)) {
+        alert("Please attach your CV as a PDF.");
+        return;
+      }
+      const packet = {
+        job: pendingApply.job.title,
+        submitted_at: new Date().toISOString(),
+        cv: cv.name,
+        cover_letter: applyForm.cover_letter.files[0] ? applyForm.cover_letter.files[0].name : "",
+        other_docs: [...applyForm.other_docs.files].map((f) => f.name),
+        answers: Object.fromEntries(new FormData(applyForm))
+      };
+      delete packet.answers.cv;
+      delete packet.answers.cover_letter;
+      delete packet.answers.other_docs;
+      const storeKey = "ats-forms-" + pendingApply.candidate.email;
+      const forms = JSON.parse(localStorage.getItem(storeKey) || "[]");
+      forms.push(packet);
+      localStorage.setItem(storeKey, JSON.stringify(forms));
+      pendingApply.applied.add(pendingApply.job.title);
+      localStorage.setItem(pendingApply.appliedKey, JSON.stringify([...pendingApply.applied]));
+      applyModal.classList.remove("open");
+      pendingApply.redraw();
+      alert("Application submitted with CV" + (packet.cover_letter ? " and cover letter" : "") + ".");
     };
     logoutStaff.onclick = logoutCand.onclick = (e) => { e.preventDefault(); show("login"); };
 

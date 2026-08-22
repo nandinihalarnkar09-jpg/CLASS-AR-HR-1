@@ -34,10 +34,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const ok = /\.(pdf|doc|docx)$/i.test(file.originalname);
-    cb(ok ? null : new Error("Only PDF/DOC/DOCX resumes are allowed"), ok);
+    const ok = /\.(pdf|doc|docx|jpg|jpeg|png)$/i.test(file.originalname);
+    cb(ok ? null : new Error("Attach PDF, Word, or image files only"), ok);
   },
 });
+const applyUpload = upload;
 
 function currentUser(req) {
   const id = Number(req.header("x-user-id") || 2);
@@ -168,7 +169,11 @@ app.get("/api/portal/me", (req, res) => {
   });
 });
 
-app.post("/api/portal/apply", (req, res) => {
+app.post("/api/portal/apply", applyUpload.fields([
+  { name: "cv", maxCount: 1 },
+  { name: "cover_letter", maxCount: 1 },
+  { name: "other_docs", maxCount: 5 },
+]), (req, res) => {
   const c = currentCandidate(req);
   if (!c) return res.status(401).json({ error: "Please log in as a candidate" });
   const jobId = Number(req.body.job_id);
@@ -176,12 +181,29 @@ app.post("/api/portal/apply", (req, res) => {
   if (!job) return res.status(404).json({ error: "Job not found" });
   const existing = db.prepare("SELECT * FROM applications WHERE candidate_id=? AND job_id=?").get(c.id, jobId);
   if (existing) return res.status(409).json({ error: "You have already applied to this role" });
+  const cv = (req.files && req.files.cv && req.files.cv[0]) || null;
+  if (!cv) return res.status(400).json({ error: "Please attach your CV as a PDF" });
+  if (!/\.pdf$/i.test(cv.originalname)) return res.status(400).json({ error: "CV must be a PDF" });
+  const cover = req.files && req.files.cover_letter && req.files.cover_letter[0];
+  const others = (req.files && req.files.other_docs) || [];
+  const answers = { ...req.body };
+  delete answers.job_id;
   const info = db.prepare(
     "INSERT INTO applications (candidate_id, job_id, stage, outcome) VALUES (?, ?, 'applied', 'active')"
   ).run(c.id, jobId);
   db.prepare(
     "INSERT INTO stage_history (application_id, from_stage, to_stage, outcome, moved_by, note) VALUES (?, NULL, 'applied', 'active', NULL, ?)"
   ).run(info.lastInsertRowid, "Candidate self-apply");
+  db.prepare(`
+    INSERT INTO application_forms (application_id, answers_json, cv_filename, cover_letter_filename, other_docs)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(
+    info.lastInsertRowid,
+    JSON.stringify(answers),
+    cv.filename,
+    cover ? cover.filename : null,
+    others.map((f) => f.filename).join(",")
+  );
   audit(null, "create", "application", info.lastInsertRowid, { candidate_id: c.id, job_id: jobId, source: "portal" });
   res.status(201).json({ id: info.lastInsertRowid });
 });

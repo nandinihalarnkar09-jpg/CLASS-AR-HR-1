@@ -167,3 +167,13 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs(entity_type, entity_id);
+
+CREATE TABLE IF NOT EXISTS application_forms (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+  answers_json TEXT NOT NULL,
+  cv_filename TEXT,
+  cover_letter_filename TEXT,
+  other_docs TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

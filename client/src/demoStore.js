@@ -158,9 +158,15 @@ export async function demoRequest(path, options = {}, userId = 2, session = null
   const method = (options.method || "GET").toUpperCase();
   const url = new URL(path, "http://local.demo");
   const p = url.pathname;
-  const body = options.body && !(options.body instanceof FormData)
-    ? JSON.parse(options.body)
-    : {};
+  let body = {};
+  if (options.body instanceof FormData) {
+    options.body.forEach((v, k) => {
+      if (typeof v === "string") body[k] = v;
+    });
+    body.job_id = Number(body.job_id);
+  } else if (options.body) {
+    body = JSON.parse(options.body);
+  }
 
   const json = (data, status = 200) => {
     save(s);
@@ -214,6 +220,7 @@ export async function demoRequest(path, options = {}, userId = 2, session = null
   }
   if (p === "/api/portal/apply" && method === "POST") {
     const cid = session?.candidate?.id;
+    if (!body.job_id) return json({ error: "Job is required" }, 400);
     const existing = s.applications.find((a) => a.candidate_id === cid && a.job_id === body.job_id);
     if (existing) return json({ error: "You have already applied to this role" }, 409);
     const id = ++s.ids.app;
