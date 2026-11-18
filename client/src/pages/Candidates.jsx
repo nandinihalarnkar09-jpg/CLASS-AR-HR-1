@@ -25,13 +25,14 @@ export default function Candidates({ meta }) {
   const [q, setQ] = useState("");
   const [skill, setSkill] = useState("");
   const [source, setSource] = useState("");
+  const [maxNotice, setMaxNotice] = useState("");
   const [form, setForm] = useState(null);
   const [dup, setDup] = useState(null);
   const nav = useNavigate();
   const canEdit = meta.user.role !== "hiring_manager";
 
   function load(params) {
-    api.candidates(params || { q, skill, source }).then(setRows);
+    api.candidates(params || { q, skill, source, maxNotice }).then(setRows);
   }
   useEffect(() => { load({ q: "", skill: "", source: "" }); }, []);
 
@@ -39,7 +40,7 @@ export default function Candidates({ meta }) {
     setForm((f) => ({ ...f, phone }));
     if (String(phone).replace(/\D/g, "").length >= 10) {
       const r = await api.checkPhone(phone);
-      setDup(r.duplicate ? r.candidate : null);
+      setDup(r.duplicate ? { ...r.candidate, activeWith: r.activeWith || [] } : null);
     } else setDup(null);
   }
 
@@ -74,9 +75,15 @@ export default function Candidates({ meta }) {
           <option value="">All sources</option>
           {meta.sourceTypes.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
-        <button className="btn secondary" onClick={() => load({ q, skill, source })}>Search</button>
+        <select value={maxNotice} onChange={(e) => setMaxNotice(e.target.value)} style={{ maxWidth: 190 }}>
+          <option value="">Any notice period</option>
+          <option value="15">Notice ≤ 15 days</option>
+          <option value="30">Notice ≤ 30 days</option>
+          <option value="60">Notice ≤ 60 days</option>
+        </select>
+        <button className="btn secondary" onClick={() => load({ q, skill, source, maxNotice })}>Search</button>
       </div>
-      <div className="card">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
@@ -111,11 +118,16 @@ export default function Candidates({ meta }) {
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </label>
             <label className="field">Phone
-              <input value={form.phone} onChange={(e) => onPhone(e.target.value)} required />
+              <input value={form.phone} onChange={(e) => onPhone(e.target.value)} placeholder="+91 98765 43210" required />
             </label>
             {dup && (
               <div className="alert danger full">
-                Duplicate phone: {dup.name} ({dup.email}). Open the existing record instead of creating a second outreach trail.
+                Duplicate phone: {dup.name} ({dup.email}) is already in the system.
+                {dup.activeWith?.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    Already being pursued for: {dup.activeWith.map((a) => `${a.title} (${a.recruiter_name || "unassigned"})`).join(", ")}. Coordinate before calling.
+                  </div>
+                )}
                 <div><button type="button" className="btn small" style={{ marginTop: 8 }} onClick={() => nav(`/candidates/${dup.id}`)}>Open existing</button></div>
               </div>
             )}

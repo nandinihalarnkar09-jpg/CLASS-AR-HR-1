@@ -175,3 +175,55 @@ test("candidate cannot open recruiter APIs", async () => {
   });
   assert.equal(res.status, 403);
 });
+
+test("US-01: +91 and leading-0 phone variants are caught as duplicates", async () => {
+  const r = await req("GET", "/api/candidates/check-phone?phone=" + encodeURIComponent("+91 98765 00001"));
+  assert.equal(r.json.duplicate, true);
+  assert.ok(r.json.activeWith.length >= 1);
+  const r2 = await req("GET", "/api/candidates/check-phone?phone=09876500001");
+  assert.equal(r2.json.duplicate, true);
+});
+
+test("US-04: stages cannot be skipped", async () => {
+  const pipe = await req("GET", "/api/pipeline");
+  const card = pipe.json.items.find((i) => i.stage === "screened");
+  const res = await req("POST", `/api/applications/${card.id}/move`, { to_stage: "offered" });
+  assert.equal(res.status, 400);
+});
+
+test("US-06: joining requires BGV clear", async () => {
+  const pipe = await req("GET", "/api/pipeline");
+  const card = pipe.json.items.find((i) => i.stage === "bgv");
+  const blocked = await req("POST", `/api/applications/${card.id}/move`, { to_stage: "joined" });
+  assert.equal(blocked.status, 400);
+  await req("POST", `/api/applications/${card.id}/bgv`, { bgv_status: "clear" });
+  const ok = await req("POST", `/api/applications/${card.id}/move`, { to_stage: "joined" });
+  assert.equal(ok.status, 200);
+});
+
+test("US-09: hiring manager sees only shortlisted candidates for own roles, no salary", async () => {
+  const pipe = await req("GET", "/api/pipeline", null, 6);
+  assert.ok(pipe.json.items.length > 0);
+  for (const i of pipe.json.items) {
+    assert.ok(["internal_interview", "client_round", "offered", "bgv", "joined"].includes(i.stage));
+    assert.equal(i.current_ctc_lpa, null);
+    assert.equal(i.expected_ctc_lpa, null);
+    assert.equal(i.offered_ctc_lpa, null);
+  }
+  assert.equal(pipe.json.terminal.length, 0);
+  const move = await req("POST", `/api/applications/${pipe.json.items[0].id}/move`, { to_stage: "screened" }, 6);
+  assert.equal(move.status, 403);
+});
+
+test("US-10/13: dashboard drop-out rate and DPDP erasure", async () => {
+  const d = await req("GET", "/api/dashboard", null, 1);
+  assert.ok(d.json.offerCohort.dropRatePct > 0);
+  const due = await req("GET", "/api/privacy/retention", null, 1);
+  assert.ok(due.json.length >= 1);
+  const er = await req("POST", `/api/privacy/erase/${due.json[0].id}`, {}, 1);
+  assert.equal(er.status, 200);
+  const c = await req("GET", `/api/candidates/${due.json[0].id}`, null, 1);
+  assert.match(c.json.candidate.name, /Erased/);
+  const recruiterTry = await req("GET", "/api/privacy/retention", null, 2);
+  assert.equal(recruiterTry.status, 403);
+});

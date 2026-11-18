@@ -1,4 +1,10 @@
-/** Browser-side demo data when the Express API is not running (GitHub / missing Node server). */
+/**
+ * In-browser backend for the live website (GitHub Pages) and whenever the Node API is not running.
+ * Seed data is exported from the real server seed at build time (scripts/export-demo-seed.js) and
+ * the rules below mirror server/index.js, so the live site behaves like the local app.
+ * Data lives in this browser only (localStorage); "Reset demo data" restores the seed.
+ */
+import SEED from "./demoSeed.json";
 
 const STAGE_LABELS = {
   applied: "Applied",
@@ -10,6 +16,7 @@ const STAGE_LABELS = {
   joined: "Joined",
 };
 const STAGES = Object.keys(STAGE_LABELS);
+const HM_STAGES = STAGES.slice(2);
 const REJECT_REASONS = [
   { code: "skills_mismatch", label: "Skills mismatch" },
   { code: "ctc_mismatch", label: "CTC mismatch" },
@@ -21,417 +28,674 @@ const REJECT_REASONS = [
   { code: "experience", label: "Experience band mismatch" },
   { code: "other", label: "Other" },
 ];
+const SOURCE_TYPES = ["naukri", "linkedin", "referral", "consultancy", "direct"];
+const STAFF_PASSWORD = "Meridian@2026";
+const KEY = "meridian-ats-demo-v4";
 
-function now() {
-  return new Date().toISOString().replace("T", " ").slice(0, 19);
+const nowTs = () => new Date().toISOString().replace("T", " ").slice(0, 19);
+const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (iso, n) => {
+  const d = new Date(iso.slice(0, 10) + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const daysBetween = (a, b) =>
+  Math.round((Date.parse(b.slice(0, 10) + "T00:00:00Z") - Date.parse(a.slice(0, 10) + "T00:00:00Z")) / 86400000);
+
+function normalizePhone(raw) {
+  let d = String(raw || "").replace(/\D/g, "");
+  if (d.length === 12 && d.startsWith("91")) d = d.slice(2);
+  else if (d.length === 11 && d.startsWith("0")) d = d.slice(1);
+  return d;
 }
 
-function seed() {
-  const users = [
-    { id: 1, name: "Priya Nair", email: "priya.nair@meridian.tech", role: "ta_head", password: "Meridian@2026" },
-    { id: 2, name: "Arjun Mehta", email: "arjun.mehta@meridian.tech", role: "recruiter", password: "Meridian@2026" },
-    { id: 3, name: "Sneha Iyer", email: "sneha.iyer@meridian.tech", role: "recruiter", password: "Meridian@2026" },
-    { id: 6, name: "Vikram Rao", email: "vikram.rao@meridian.tech", role: "hiring_manager", password: "Meridian@2026" },
-  ];
-  const clients = [
-    { id: 1, name: "HDFC Bank" },
-    { id: 2, name: "Tata Motors" },
-    { id: 4, name: "Reliance Jio" },
-  ];
-  const projects = [
-    { id: 1, client_id: 1, name: "Digital Lending Platform", start_date: "2026-09-15", billing_rate_inr: 185000, client_name: "HDFC Bank" },
-    { id: 3, client_id: 2, name: "Connected Vehicle Analytics", start_date: "2026-09-01", billing_rate_inr: 165000, client_name: "Tata Motors" },
-    { id: 5, client_id: 4, name: "5G OSS Support", start_date: "2026-08-25", billing_rate_inr: 175000, client_name: "Reliance Jio" },
-  ];
-  const consultancies = [
-    { id: 1, name: "Adecco India", fee_percent: 8.33 },
-    { id: 2, name: "TeamLease Digital", fee_percent: 8.33 },
-    { id: 3, name: "Randstad India", fee_percent: 8.33 },
-  ];
-  const jobs = [
-    { id: 1, title: "Java Full Stack Engineer", client_id: 1, project_id: 1, skills_required: "Java, Spring Boot, React, PostgreSQL", exp_min_years: 4, exp_max_years: 8, ctc_min_lpa: 18, ctc_max_lpa: 28, location: "Bengaluru", target_closure_date: "2026-09-10", recruiter_id: 2, status: "open", client_name: "HDFC Bank", project_name: "Digital Lending Platform", project_start: "2026-09-15", billing_rate_inr: 185000, recruiter_name: "Arjun Mehta", created_at: "2026-07-01 09:00:00" },
-    { id: 2, title: "React Frontend Developer", client_id: 1, project_id: 1, skills_required: "React, TypeScript, Redux, Jest", exp_min_years: 3, exp_max_years: 6, ctc_min_lpa: 14, ctc_max_lpa: 22, location: "Hyderabad", target_closure_date: "2026-09-20", recruiter_id: 3, status: "open", client_name: "HDFC Bank", project_name: "Digital Lending Platform", project_start: "2026-09-15", billing_rate_inr: 185000, recruiter_name: "Sneha Iyer", created_at: "2026-07-05 09:00:00" },
-    { id: 3, title: "Data Engineer", client_id: 2, project_id: 3, skills_required: "Python, Spark, Kafka, AWS", exp_min_years: 5, exp_max_years: 9, ctc_min_lpa: 20, ctc_max_lpa: 32, location: "Pune", target_closure_date: "2026-08-28", recruiter_id: 2, status: "open", client_name: "Tata Motors", project_name: "Connected Vehicle Analytics", project_start: "2026-09-01", billing_rate_inr: 165000, recruiter_name: "Arjun Mehta", created_at: "2026-07-08 09:00:00" },
-    { id: 5, title: "DevOps Engineer", client_id: 4, project_id: 5, skills_required: "Kubernetes, Terraform, Jenkins, AWS", exp_min_years: 4, exp_max_years: 7, ctc_min_lpa: 18, ctc_max_lpa: 26, location: "Mumbai", target_closure_date: "2026-08-22", recruiter_id: 2, status: "open", client_name: "Reliance Jio", project_name: "5G OSS Support", project_start: "2026-08-25", billing_rate_inr: 175000, recruiter_name: "Arjun Mehta", created_at: "2026-07-10 09:00:00" },
-  ];
-  const candidates = [
-    { id: 1, name: "Aditya Menon", phone: "9876500001", email: "aditya.menon@example.com", current_company: "Wipro", current_ctc_lpa: 16, expected_ctc_lpa: 22, notice_period_days: 90, total_experience_years: 6.5, skills: "Java, Spring Boot, React", source_type: "naukri", source_detail: "Naukri search", consultancy_id: null, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 2, name: "Nisha Verma", phone: "9876500002", email: "nisha.verma@example.com", current_company: "TCS", current_ctc_lpa: 14, expected_ctc_lpa: 18, notice_period_days: 30, total_experience_years: 4.2, skills: "React, TypeScript, Redux", source_type: "linkedin", source_detail: "InMail", consultancy_id: null, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 3, name: "Farhan Qureshi", phone: "9876500003", email: "farhan.q@example.com", current_company: "Capgemini", current_ctc_lpa: 22, expected_ctc_lpa: 30, notice_period_days: 60, total_experience_years: 8, skills: "Python, Spark, Kafka, AWS", source_type: "consultancy", source_detail: "Adecco India", consultancy_id: 1, referred_by: null, portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-    { id: 4, name: "Kavya Reddy", phone: "9876500004", email: "kavya.reddy@example.com", current_company: "Accenture", current_ctc_lpa: 18, expected_ctc_lpa: 24, notice_period_days: 15, total_experience_years: 5.5, skills: "Java, Spring, Microservices", source_type: "referral", source_detail: "Employee referral", consultancy_id: null, referred_by: "Vikram Rao", portal_password: "Welcome@123", consent_given: 1, consent_purpose: "Recruitment for client-delivery roles at Meridian Technologies", retention_until: "2029-08-20", updated_at: now() },
-  ];
-  const applications = [
-    { id: 1, candidate_id: 1, job_id: 1, stage: "client_round", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: null, joining_date: null, updated_at: now() },
-    { id: 2, candidate_id: 2, job_id: 2, stage: "internal_interview", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: null, joining_date: null, updated_at: now() },
-    { id: 3, candidate_id: 3, job_id: 3, stage: "offered", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: 28, joining_date: "2026-10-15", updated_at: now() },
-    { id: 4, candidate_id: 4, job_id: 1, stage: "bgv", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: 24, joining_date: "2026-09-01", updated_at: now() },
-    { id: 5, candidate_id: 2, job_id: 1, stage: "screened", outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null, offered_ctc_lpa: null, joining_date: null, updated_at: now() },
-    { id: 6, candidate_id: 1, job_id: 5, stage: "applied", outcome: "dropped_out", reject_reason_code: null, reject_notes: null, dropout_reason: "Accepted competing offer", offered_ctc_lpa: null, joining_date: null, updated_at: now() },
-  ];
-  return {
-    users, clients, projects, consultancies, jobs, candidates, applications,
-    notes: [
-      { id: 1, candidate_id: 3, author_id: 2, author_name: "Arjun Mehta", body: "Holds competing offer from Infosys (28 LPA).", created_at: now() },
-      { id: 2, candidate_id: 1, author_id: 3, author_name: "Sneha Iyer", body: "90-day notice vs HDFC start 15 Sep — timeline risk.", created_at: now() },
-    ],
-    history: applications.map((a) => ({
-      id: a.id,
-      application_id: a.id,
-      from_stage: null,
-      to_stage: a.stage,
-      outcome: a.outcome,
-      moved_by_name: "Arjun Mehta",
-      moved_at: now(),
-      note: "Seeded",
-    })),
-    interviews: [
-      { id: 1, application_id: 1, job_id: 1, job_title: "Java Full Stack Engineer", round_type: "client", panel_names: "HDFC panel: Rakesh Iyer", scheduled_at: "2026-08-21T15:00:00" },
-    ],
-    offers: [
-      { id: 1, application_id: 3, job_id: 3, job_title: "Data Engineer", offered_ctc_lpa: 28, joining_date: "2026-10-15", status: "pending" },
-    ],
-    audit: [],
-    ids: { job: 10, candidate: 10, app: 10, note: 10, hist: 20, interview: 10, offer: 10 },
-  };
-}
-
-const KEY = "meridian-ats-demo-v2";
-
-function load() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {
-    /* ignore */
+// Shift every date in the seed so the demo is always "current", whenever it is opened.
+function freshSeed() {
+  const shift = daysBetween(SEED.exportedOn, today());
+  const text = JSON.stringify(SEED).replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (m) => addDays(m, shift));
+  const s = JSON.parse(text);
+  for (const u of s.users) u.password = STAFF_PASSWORD;
+  s.application_forms = [];
+  s.audit = [];
+  const max = (arr) => arr.reduce((m, r) => Math.max(m, r.id), 0);
+  s.ids = {};
+  for (const t of ["jobs", "candidates", "applications", "stage_history", "notes", "interviews", "offers", "application_forms"]) {
+    s.ids[t] = max(s[t]) + 100;
   }
-  const s = seed();
-  save(s);
   return s;
 }
 
-function save(s) {
-  localStorage.setItem(KEY, JSON.stringify(s));
+let memory = null;
+function state() {
+  if (memory) return memory;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) memory = JSON.parse(raw);
+  } catch {
+    /* storage unavailable — use memory only */
+  }
+  if (!memory) memory = freshSeed();
+  return memory;
+}
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(memory));
+  } catch {
+    /* quota or private mode — keep in memory */
+  }
+}
+export function resetDemo() {
+  memory = freshSeed();
+  save();
 }
 
-function user(s, userId) {
-  return s.users.find((u) => u.id === Number(userId)) || s.users[1];
+export let demoActive = false;
+export function enableDemo() {
+  demoActive = true;
 }
 
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const target = new Date(dateStr + "T00:00:00");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.round((target - today) / 86400000);
+class HttpError extends Error {
+  constructor(status, message, data) {
+    super(message);
+    this.status = status;
+    this.data = data;
+  }
+}
+const fail = (status, message, extra) => {
+  throw new HttpError(status, message, { error: message, ...(extra || {}) });
+};
+
+// ---------- joins & rules (mirror server/index.js) ----------
+
+const byId = (arr, id) => arr.find((x) => x.id === Number(id));
+const isHM = (u) => u.role === "hiring_manager";
+const canSeeComp = (u) => u.role === "recruiter" || u.role === "ta_head";
+
+function mask(u, row) {
+  if (canSeeComp(u)) return row;
+  return { ...row, current_ctc_lpa: null, expected_ctc_lpa: null, offered_ctc_lpa: null, compensation_masked: true };
+}
+
+function jobView(s, j) {
+  const cl = byId(s.clients, j.client_id);
+  const p = byId(s.projects, j.project_id);
+  const r = byId(s.users, j.recruiter_id);
+  return {
+    ...j,
+    client_name: cl?.name,
+    project_name: p?.name,
+    project_start: p?.start_date,
+    billing_rate_inr: p?.billing_rate_inr,
+    recruiter_name: r?.name,
+    active_pipeline: s.applications.filter((a) => a.job_id === j.id && a.outcome === "active").length,
+  };
 }
 
 function noticeRisk(noticeDays, projectStart) {
-  const untilStart = daysUntil(projectStart);
-  if (untilStart == null) return { level: "unknown", untilStart: null };
+  if (!projectStart) return { level: "unknown", untilStart: null };
+  const untilStart = daysBetween(today(), projectStart);
   if (noticeDays > untilStart) return { level: "high", untilStart };
   if (noticeDays > untilStart - 14) return { level: "medium", untilStart };
   return { level: "low", untilStart };
 }
 
-function jobRow(s, j) {
-  return {
-    ...j,
-    active_pipeline: s.applications.filter((a) => a.job_id === j.id && a.outcome === "active").length,
-  };
+const notesText = (s, cid) => s.notes.filter((n) => n.candidate_id === cid).map((n) => n.body).join(" ");
+
+function offerRisk(a, c, text) {
+  if (a.outcome !== "active" || !["client_round", "offered", "bgv"].includes(a.stage)) return null;
+  let score = 0;
+  const reasons = [];
+  if (c.holds_other_offers) { score += 3; reasons.push("Holds other offers"); }
+  else if (/(competing|counter|other)[ -]offer/i.test(text || "")) { score += 2; reasons.push("Notes mention a competing offer"); }
+  if (c.notice_period_days >= 60) { score += 2; reasons.push(c.notice_period_days + "-day notice"); }
+  else if (c.notice_period_days >= 30) { score += 1; reasons.push(c.notice_period_days + "-day notice"); }
+  if (a.offered_ctc_lpa && c.expected_ctc_lpa && a.offered_ctc_lpa < c.expected_ctc_lpa) {
+    score += 2;
+    reasons.push("Offer below expected CTC");
+  }
+  return { level: score >= 5 ? "high" : score >= 3 ? "medium" : "low", score, reasons };
 }
 
-function mask(u, c) {
-  if (u.role === "recruiter" || u.role === "ta_head") return c;
-  return { ...c, current_ctc_lpa: null, expected_ctc_lpa: null, compensation_masked: true };
+function hmVisibleApps(s, u) {
+  const mine = new Set(s.jobs.filter((j) => j.hiring_manager_id === u.id).map((j) => j.id));
+  return s.applications.filter(
+    (a) => mine.has(a.job_id) && (a.outcome === "active" || a.outcome === "joined") && HM_STAGES.includes(a.stage)
+  );
 }
 
-export let demoActive = false;
-
-export function enableDemo() {
-  demoActive = true;
+function history(s, appId, from, to, outcome, u, note) {
+  s.stage_history.push({
+    id: ++s.ids.stage_history, application_id: appId, from_stage: from, to_stage: to, outcome,
+    moved_by: u?.id ?? null, moved_at: nowTs(), note: note || null,
+  });
 }
+
+function audit(s, u, action, entity_type, entity_id, details) {
+  s.audit.unshift({
+    id: (s.audit[0]?.id || 0) + 1, user_id: u?.id ?? null, user_name: u?.name ?? null, action, entity_type,
+    entity_id, details: details ? JSON.stringify(details) : null, created_at: nowTs(),
+  });
+  if (s.audit.length > 300) s.audit.length = 300;
+}
+
+function erase(s, id) {
+  const c = byId(s.candidates, id);
+  if (!c) return false;
+  s.notes = s.notes.filter((n) => n.candidate_id !== c.id);
+  const appIds = new Set(s.applications.filter((a) => a.candidate_id === c.id).map((a) => a.id));
+  s.application_forms = s.application_forms.filter((f) => !appIds.has(f.application_id));
+  for (const a of s.applications) {
+    if (a.candidate_id === c.id && a.outcome === "active") {
+      a.outcome = "dropped_out";
+      a.dropout_reason = a.dropout_reason || "Data erased (DPDP)";
+    }
+  }
+  Object.assign(c, {
+    name: `Erased candidate #${c.id}`, phone: `ERASED-${c.id}`, email: `erased-${c.id}@invalid`,
+    current_company: null, current_ctc_lpa: null, expected_ctc_lpa: null, skills: "", source_detail: null,
+    referred_by: null, resume_path: null, resume_original_name: null, portal_password: Math.random().toString(36),
+    consent_given: 0, erased_at: nowTs(),
+  });
+  return true;
+}
+
+// ---------- request entry point ----------
 
 export async function demoRequest(path, options = {}, userId = 2, session = null) {
   enableDemo();
-  const s = load();
-  const u = user(s, session?.type === "staff" ? session.user.id : userId);
+  const s = state();
   const method = (options.method || "GET").toUpperCase();
   const url = new URL(path, "http://local.demo");
-  const p = url.pathname;
-  const body = options.body && !(options.body instanceof FormData)
-    ? JSON.parse(options.body)
-    : {};
-
-  const json = (data, status = 200) => {
-    save(s);
-    if (status >= 400) {
-      const err = new Error(data.error || "Error");
-      err.status = status;
-      err.data = data;
+  const qp = (k) => url.searchParams.get(k) || "";
+  let body = {};
+  if (options.body instanceof FormData) {
+    options.body.forEach((v, k) => {
+      if (typeof v === "string") body[k] = v;
+    });
+    if (body.job_id) body.job_id = Number(body.job_id);
+  } else if (options.body) {
+    body = JSON.parse(options.body);
+  }
+  try {
+    return route(s, method, url.pathname, qp, body, options, userId, session);
+  } catch (e) {
+    if (e instanceof HttpError) {
+      const err = new Error(e.message);
+      err.status = e.status;
+      err.data = e.data;
       throw err;
     }
-    return data;
-  };
+    throw e;
+  } finally {
+    if (method !== "GET" || url.pathname.startsWith("/api/candidates/")) save();
+  }
+}
 
+function route(s, method, p, qp, body, options, userId, session) {
+  const m = (re) => p.match(re);
+
+  // ---- public / auth ----
   if (p === "/api/auth/demo-accounts") {
-    return json({
-      staffPassword: "Meridian@2026",
+    return {
+      staffPassword: STAFF_PASSWORD,
       candidatePassword: "Welcome@123",
       staff: s.users.map(({ password, ...rest }) => rest),
-      candidates: s.candidates.map((c) => ({ name: c.name, email: c.email, phone: c.phone })),
-    });
+      candidates: s.candidates.filter((c) => !c.erased_at).slice(0, 8).map((c) => ({ name: c.name, email: c.email, phone: c.phone })),
+    };
   }
   if (p === "/api/auth/login" && method === "POST") {
-    const email = String(body.email || "").toLowerCase();
+    const email = String(body.email || "").trim().toLowerCase();
     if (body.portal === "candidate") {
-      const c = s.candidates.find((x) => x.email.toLowerCase() === email);
-      if (!c || c.portal_password !== body.password) return json({ error: "Invalid candidate email or password" }, 401);
-      return json({ type: "candidate", candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone } });
+      const c = s.candidates.find((x) => x.email.toLowerCase() === email && !x.erased_at);
+      if (!c || c.portal_password !== body.password) fail(401, "Invalid candidate email or password");
+      return { type: "candidate", candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone } };
     }
-    const staff = s.users.find((x) => x.email.toLowerCase() === email);
-    if (!staff || staff.password !== body.password) return json({ error: "Invalid recruiter email or password" }, 401);
-    return json({ type: "staff", user: { id: staff.id, name: staff.name, email: staff.email, role: staff.role } });
-  }
-  if (p === "/api/portal/jobs") {
-    const cid = session?.candidate?.id;
-    const applied = new Set(s.applications.filter((a) => a.candidate_id === cid).map((a) => a.job_id));
-    return json(s.jobs.filter((j) => j.status === "open").map((j) => ({
-      id: j.id, title: j.title, skills_required: j.skills_required, location: j.location,
-      exp_min_years: j.exp_min_years, exp_max_years: j.exp_max_years, client_name: j.client_name,
-      applied: applied.has(j.id),
-    })));
-  }
-  if (p === "/api/portal/me") {
-    const cid = session?.candidate?.id;
-    const c = s.candidates.find((x) => x.id === cid);
-    if (!c) return json({ error: "Please log in as a candidate" }, 401);
-    const STAGE_LABELS_LOCAL = STAGE_LABELS;
-    const applications = s.applications.filter((a) => a.candidate_id === cid).map((a) => {
-      const j = s.jobs.find((job) => job.id === a.job_id);
-      return { ...a, job_title: j?.title, location: j?.location, client_name: j?.client_name, stage_label: STAGE_LABELS_LOCAL[a.stage] };
-    });
-    return json({ candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone, skills: c.skills, notice_period_days: c.notice_period_days }, applications, stageLabels: STAGE_LABELS });
-  }
-  if (p === "/api/portal/apply" && method === "POST") {
-    const cid = session?.candidate?.id;
-    const existing = s.applications.find((a) => a.candidate_id === cid && a.job_id === body.job_id);
-    if (existing) return json({ error: "You have already applied to this role" }, 409);
-    const id = ++s.ids.app;
-    s.applications.push({ id, candidate_id: cid, job_id: body.job_id, stage: "applied", outcome: "active" });
-    return json({ id }, 201);
+    const u = s.users.find((x) => x.email.toLowerCase() === email);
+    if (!u || u.password !== body.password) fail(401, "Invalid recruiter email or password");
+    audit(s, u, "login", "user", u.id, { portal: "staff" });
+    return { type: "staff", user: { id: u.id, name: u.name, email: u.email, role: u.role } };
   }
 
-  s.audit.unshift({
-    id: s.audit.length + 1,
-    created_at: now(),
-    user_name: u.name,
-    action: method === "GET" ? "read" : "write",
-    entity_type: p,
-    entity_id: null,
-    details: "{}",
-  });
+  // ---- candidate portal ----
+  if (p.startsWith("/api/portal/")) {
+    const c = byId(s.candidates, session?.candidate?.id);
+    if (!c || c.erased_at) fail(401, "Please log in as a candidate");
+    if (p === "/api/portal/jobs") {
+      const applied = new Set(s.applications.filter((a) => a.candidate_id === c.id).map((a) => a.job_id));
+      return s.jobs.filter((j) => j.status === "open").map((j) => ({
+        id: j.id, title: j.title, skills_required: j.skills_required, description: j.description,
+        requirements: j.requirements, pay: j.pay, benefits: j.benefits, exp_min_years: j.exp_min_years,
+        exp_max_years: j.exp_max_years, location: j.location, target_closure_date: j.target_closure_date,
+        client_name: byId(s.clients, j.client_id)?.name, applied: applied.has(j.id),
+      }));
+    }
+    if (p === "/api/portal/me") {
+      const applications = s.applications.filter((a) => a.candidate_id === c.id).map((a) => {
+        const j = byId(s.jobs, a.job_id);
+        return {
+          id: a.id, stage: a.stage, outcome: a.outcome, joining_date: a.joining_date, job_title: j?.title,
+          location: j?.location, client_name: byId(s.clients, j?.client_id)?.name, stage_label: STAGE_LABELS[a.stage],
+        };
+      });
+      return {
+        candidate: {
+          id: c.id, name: c.name, email: c.email, phone: c.phone, notice_period_days: c.notice_period_days,
+          skills: c.skills, total_experience_years: c.total_experience_years,
+        },
+        applications,
+        stageLabels: STAGE_LABELS,
+      };
+    }
+    if (p === "/api/portal/apply" && method === "POST") {
+      const job = byId(s.jobs, body.job_id);
+      if (!job || job.status !== "open") fail(404, "Job not found");
+      if (s.applications.some((a) => a.candidate_id === c.id && a.job_id === job.id)) fail(409, "You have already applied to this role");
+      const fd = options.body instanceof FormData ? options.body : null;
+      const cv = fd?.get("cv");
+      if (!cv || !cv.name) fail(400, "Please attach your CV as a PDF");
+      if (!/\.pdf$/i.test(cv.name)) fail(400, "CV must be a PDF");
+      const id = ++s.ids.applications;
+      s.applications.push({
+        id, candidate_id: c.id, job_id: job.id, stage: "applied", outcome: "active", bgv_status: "not_started",
+        created_at: nowTs(), updated_at: nowTs(),
+      });
+      history(s, id, null, "applied", "active", null, "Candidate self-apply");
+      const { job_id, ...answers } = body;
+      if (answers.other_offers === "Yes") c.holds_other_offers = 1;
+      s.application_forms.push({
+        id: ++s.ids.application_forms, application_id: id, answers_json: JSON.stringify(answers),
+        cv_filename: cv.name, cover_letter_filename: fd.get("cover_letter")?.name || null, other_docs: "",
+        created_at: nowTs(),
+      });
+      audit(s, null, "create", "application", id, { candidate_id: c.id, job_id: job.id, source: "portal" });
+      return { id };
+    }
+    if (p === "/api/portal/erase" && method === "POST") {
+      erase(s, c.id);
+      audit(s, null, "erase", "candidate", c.id, { reason: "candidate withdrew consent" });
+      return { ok: true };
+    }
+    fail(404, "Not found");
+  }
+
+  // ---- staff area ----
+  if (session?.type === "candidate") fail(403, "This area is for recruiters and hiring managers only");
+  const u = byId(s.users, session?.type === "staff" ? session.user.id : userId) || s.users[1];
 
   if (p === "/api/meta") {
-    return json({
-      user: u,
-      stages: STAGES,
-      stageLabels: STAGE_LABELS,
-      rejectReasons: REJECT_REASONS,
-      sourceTypes: ["naukri", "linkedin", "referral", "consultancy", "direct"],
+    return {
+      user: { id: u.id, name: u.name, email: u.email, role: u.role },
+      stages: STAGES, stageLabels: STAGE_LABELS, rejectReasons: REJECT_REASONS, sourceTypes: SOURCE_TYPES,
       retentionYears: 3,
-      users: s.users,
+      users: s.users.map(({ password, ...r }) => r),
       clients: s.clients,
-      projects: s.projects,
+      projects: s.projects.map((pr) => ({ ...pr, client_name: byId(s.clients, pr.client_id)?.name })),
       consultancies: s.consultancies,
       demoMode: true,
-    });
+    };
   }
-  if (p === "/api/dashboard") {
-    const active = s.applications.filter((a) => a.outcome === "active");
-    const byStage = STAGES.map((stage) => ({
-      stage,
-      label: STAGE_LABELS[stage],
-      count: active.filter((a) => a.stage === stage).length,
-    }));
-    return json({
-      kpis: {
-        openJobs: s.jobs.filter((j) => j.status === "open").length,
-        activeApps: active.length,
-        offered: active.filter((a) => a.stage === "offered" || a.stage === "bgv").length,
-        joined30: s.applications.filter((a) => a.outcome === "joined").length,
-        dropped: s.applications.filter((a) => a.outcome === "dropped_out").length,
-        rejected: s.applications.filter((a) => a.outcome === "rejected").length,
-        avgTimeToFillDays: 42,
-      },
-      byStage,
-      timeToFill: s.jobs.map((j) => ({
-        id: j.id,
-        title: j.title,
-        created_at: j.created_at,
-        target_closure_date: j.target_closure_date,
-        joining_date: null,
-        days_open: 40,
-      })),
-      sources: ["naukri", "linkedin", "referral", "consultancy", "direct"].map((source_type) => ({
-        source_type,
-        n: s.candidates.filter((c) => c.source_type === source_type).length,
-        joined: 0,
-        dropped: source_type === "naukri" ? 1 : 0,
-      })),
-      offerToJoin: {},
-    });
+
+  if (p === "/api/dashboard") return dashboard(s);
+
+  if (p === "/api/jobs" && method === "GET") {
+    const jobs = s.jobs.map((j) => jobView(s, j)).sort((a, b) => a.target_closure_date.localeCompare(b.target_closure_date));
+    return isHM(u) ? jobs.filter((j) => j.hiring_manager_id === u.id) : jobs;
   }
-  if (p === "/api/jobs" && method === "GET") return json(s.jobs.map((j) => jobRow(s, j)));
-  if (p === "/api/jobs" && method === "POST") {
-    if (u.role === "hiring_manager") return json({ error: "Hiring managers cannot create requisitions" }, 403);
-    const id = ++s.ids.job;
-    const client = s.clients.find((c) => c.id === Number(body.client_id));
-    const project = s.projects.find((pr) => pr.id === Number(body.project_id));
-    const rec = s.users.find((x) => x.id === Number(body.recruiter_id));
-    s.jobs.push({
-      ...body,
-      id,
-      client_name: client?.name,
-      project_name: project?.name,
-      project_start: project?.start_date,
-      billing_rate_inr: project?.billing_rate_inr,
-      recruiter_name: rec?.name,
-      created_at: now(),
-    });
-    return json({ id }, 201);
+  if ((p === "/api/jobs" && method === "POST") || (m(/^\/api\/jobs\/\d+$/) && method === "PUT")) {
+    if (isHM(u)) fail(403, "Hiring managers cannot create or edit requisitions");
+    const fields = ["title", "client_id", "project_id", "skills_required", "exp_min_years", "exp_max_years",
+      "ctc_min_lpa", "ctc_max_lpa", "location", "target_closure_date", "recruiter_id", "status", "description",
+      "requirements", "pay", "benefits", "hiring_manager_id", "openings"];
+    const clean = Object.fromEntries(fields.map((f) => [f, body[f] ?? null]));
+    if (method === "POST") {
+      const id = ++s.ids.jobs;
+      s.jobs.push({ ...clean, id, status: clean.status || "open", openings: clean.openings || 1, created_at: nowTs(), updated_at: nowTs() });
+      audit(s, u, "create", "job", id, { title: clean.title });
+      return { id };
+    }
+    const j = byId(s.jobs, p.split("/").pop());
+    if (!j) fail(404, "Job not found");
+    Object.assign(j, clean, { updated_at: nowTs() });
+    audit(s, u, "update", "job", j.id, { title: clean.title });
+    return { ok: true };
   }
-  if (p.startsWith("/api/jobs/") && method === "PUT") {
-    const id = Number(p.split("/").pop());
-    const i = s.jobs.findIndex((j) => j.id === id);
-    if (i >= 0) s.jobs[i] = { ...s.jobs[i], ...body };
-    return json({ ok: true });
+
+  if (p === "/api/candidates/check-phone") {
+    const phone = normalizePhone(qp("phone"));
+    const c = s.candidates.find((x) => x.phone === phone);
+    if (!c || c.id === Number(qp("excludeId") || 0)) return { duplicate: false };
+    const activeWith = s.applications
+      .filter((a) => a.candidate_id === c.id && a.outcome === "active")
+      .map((a) => {
+        const j = byId(s.jobs, a.job_id);
+        return { title: j?.title, recruiter_name: byId(s.users, j?.recruiter_id)?.name, stage: a.stage };
+      });
+    return { duplicate: true, candidate: { id: c.id, name: c.name, email: c.email, phone: c.phone }, activeWith };
   }
   if (p === "/api/candidates" && method === "GET") {
-    const skill = (url.searchParams.get("skill") || "").toLowerCase();
-    const source = url.searchParams.get("source") || "";
-    const q = (url.searchParams.get("q") || "").toLowerCase();
-    let rows = s.candidates.map((c) => ({
-      ...mask(u, c),
-      consultancy_name: s.consultancies.find((x) => x.id === c.consultancy_id)?.name,
-      application_count: s.applications.filter((a) => a.candidate_id === c.id).length,
-    }));
+    let rows = s.candidates.filter((c) => !c.erased_at);
+    if (isHM(u)) {
+      const allowed = new Set(hmVisibleApps(s, u).map((a) => a.candidate_id));
+      rows = rows.filter((c) => allowed.has(c.id));
+    }
+    const skill = qp("skill").toLowerCase().trim();
+    const source = qp("source");
+    const q = qp("q").toLowerCase().trim();
+    const maxNotice = Number(qp("maxNotice") || 0);
     if (skill) rows = rows.filter((r) => (r.skills || "").toLowerCase().includes(skill));
     if (source) rows = rows.filter((r) => r.source_type === source);
-    if (q) rows = rows.filter((r) => [r.name, r.email, r.phone, r.skills].join(" ").toLowerCase().includes(q));
-    return json(rows);
+    if (maxNotice) rows = rows.filter((r) => r.notice_period_days <= maxNotice);
+    if (q) rows = rows.filter((r) => [r.name, r.email, r.phone, r.current_company, r.skills].join(" ").toLowerCase().includes(q));
+    return rows
+      .map((c) => mask(u, {
+        ...c,
+        consultancy_name: c.consultancy_id ? byId(s.consultancies, c.consultancy_id)?.name : null,
+        application_count: s.applications.filter((a) => a.candidate_id === c.id).length,
+      }))
+      .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
   }
   if (p === "/api/candidates" && method === "POST") {
-    if (!body.consent_given) return json({ error: "DPDP: consent required" }, 400);
-    const phone = String(body.phone || "").replace(/\D/g, "");
+    if (isHM(u)) fail(403, "Hiring managers cannot add candidates");
+    const phone = normalizePhone(body.phone);
+    if (!phone || phone.length < 10) fail(400, "Valid phone is required");
     const dup = s.candidates.find((c) => c.phone === phone);
-    if (dup) return json({ error: "Duplicate phone — candidate already exists.", candidate: dup }, 409);
-    const id = ++s.ids.candidate;
-    s.candidates.unshift({ ...body, id, phone, consent_given: 1, retention_until: "2029-08-20", consent_purpose: body.consent_purpose, updated_at: now() });
-    return json({ id }, 201);
-  }
-  if (p === "/api/candidates/check-phone") {
-    const phone = String(url.searchParams.get("phone") || "").replace(/\D/g, "");
-    const row = s.candidates.find((c) => c.phone === phone);
-    return json(row ? { duplicate: true, candidate: row } : { duplicate: false });
-  }
-  if (p.match(/^\/api\/candidates\/\d+$/) && method === "GET") {
-    const id = Number(p.split("/").pop());
-    const c = s.candidates.find((x) => x.id === id);
-    if (!c) return json({ error: "Not found" }, 404);
-    const applications = s.applications.filter((a) => a.candidate_id === id).map((a) => {
-      const j = s.jobs.find((job) => job.id === a.job_id);
-      return { ...a, job_title: j?.title, client_name: j?.client_name, project_name: j?.project_name, project_start: j?.project_start, notice_risk: noticeRisk(c.notice_period_days, j?.project_start) };
+    if (dup) fail(409, "Duplicate phone — candidate already exists. Do not re-outreach without checking history.", { candidate: dup });
+    if (!body.consent_given) fail(400, "DPDP: explicit consent is required before storing candidate personal data.");
+    const id = ++s.ids.candidates;
+    s.candidates.unshift({
+      id, name: body.name, phone, email: body.email, current_company: body.current_company || null,
+      current_ctc_lpa: body.current_ctc_lpa ?? null, expected_ctc_lpa: body.expected_ctc_lpa ?? null,
+      notice_period_days: Number(body.notice_period_days || 0), total_experience_years: Number(body.total_experience_years || 0),
+      skills: body.skills || "", source_type: body.source_type, source_detail: body.source_detail || null,
+      consultancy_id: body.consultancy_id || null, referred_by: body.referred_by || null, portal_password: "Welcome@123",
+      holds_other_offers: body.holds_other_offers ? 1 : 0, consent_given: 1, consent_at: nowTs(),
+      consent_purpose: body.consent_purpose || "Recruitment for client-delivery roles at Meridian Technologies",
+      retention_until: addDays(today(), 3 * 365), created_at: nowTs(), updated_at: nowTs(),
     });
-    return json({
-      candidate: mask(u, { ...c, consultancy_name: s.consultancies.find((x) => x.id === c.consultancy_id)?.name }),
-      notes: s.notes.filter((n) => n.candidate_id === id),
-      applications,
-      history: s.history.filter((h) => applications.some((a) => a.id === h.application_id)),
-      interviews: s.interviews.filter((i) => applications.some((a) => a.id === i.application_id)),
-      offers: s.offers.filter((o) => applications.some((a) => a.id === o.application_id)),
-    });
+    audit(s, u, "create", "candidate", id, { phone });
+    return { id };
   }
-  if (p.match(/^\/api\/candidates\/\d+\/notes$/) && method === "POST") {
-    const id = Number(p.split("/")[3]);
-    s.notes.unshift({ id: ++s.ids.note, candidate_id: id, author_id: u.id, author_name: u.name, body: body.body, created_at: now() });
-    return json({ id: s.ids.note }, 201);
+  if (m(/^\/api\/candidates\/\d+$/) && method === "GET") return candidateDetail(s, u, Number(p.split("/").pop()));
+  if (m(/^\/api\/candidates\/\d+$/) && method === "PUT") {
+    if (isHM(u)) fail(403, "Hiring managers cannot edit candidate records");
+    const c = byId(s.candidates, p.split("/").pop());
+    if (!c) fail(404, "Not found");
+    const phone = normalizePhone(body.phone);
+    if (s.candidates.some((x) => x.phone === phone && x.id !== c.id)) fail(409, "Phone already belongs to another candidate");
+    Object.assign(c, body, { phone, updated_at: nowTs() });
+    return { ok: true };
   }
+  if (m(/^\/api\/candidates\/\d+\/resume$/)) {
+    if (isHM(u)) fail(403, "Only recruiters upload resumes");
+    const c = byId(s.candidates, p.split("/")[3]);
+    const f = options.body instanceof FormData ? options.body.get("resume") : null;
+    c.resume_original_name = f?.name || "resume.pdf";
+    c.resume_path = null; // the browser demo records the file name only
+    return { filename: null, original: c.resume_original_name };
+  }
+  if (m(/^\/api\/candidates\/\d+\/notes$/) && method === "POST") {
+    const text = String(body.body || "").trim();
+    if (!text) fail(400, "Note cannot be empty");
+    const id = ++s.ids.notes;
+    s.notes.push({ id, candidate_id: Number(p.split("/")[3]), author_id: u.id, body: text, created_at: nowTs() });
+    return { id };
+  }
+
   if (p === "/api/applications" && method === "POST") {
-    const existing = s.applications.find((a) => a.candidate_id === body.candidate_id && a.job_id === body.job_id);
-    if (existing) return json({ error: "Candidate already linked to this job", application: existing }, 409);
-    const id = ++s.ids.app;
-    s.applications.push({ id, candidate_id: body.candidate_id, job_id: body.job_id, stage: "applied", outcome: "active" });
-    return json({ id }, 201);
+    if (isHM(u)) fail(403, "Only recruiters link candidates to jobs");
+    const cid = Number(body.candidate_id);
+    const jid = Number(body.job_id);
+    const existing = s.applications.find((a) => a.candidate_id === cid && a.job_id === jid);
+    if (existing) fail(409, "Candidate already linked to this job", { application: existing });
+    const id = ++s.ids.applications;
+    s.applications.push({
+      id, candidate_id: cid, job_id: jid, stage: "applied", outcome: "active", bgv_status: "not_started",
+      created_at: nowTs(), updated_at: nowTs(),
+    });
+    history(s, id, null, "applied", "active", u, "Linked to requisition");
+    return { id };
   }
-  if (p === "/api/pipeline") {
-    const jobId = url.searchParams.get("jobId");
-    const enrich = (a) => {
-      const c = s.candidates.find((x) => x.id === a.candidate_id);
-      const j = s.jobs.find((job) => job.id === a.job_id);
-      return {
-        ...a,
-        ...mask(u, c),
-        id: a.id,
-        candidate_id: a.candidate_id,
-        job_title: j?.title,
-        client_name: j?.client_name,
-        project_start: j?.project_start,
-        notice_risk: noticeRisk(c.notice_period_days, j?.project_start),
-      };
-    };
-    let items = s.applications.filter((a) => a.outcome === "active" || a.outcome === "joined");
-    let terminal = s.applications.filter((a) => a.outcome === "rejected" || a.outcome === "dropped_out");
-    if (jobId) {
-      items = items.filter((a) => a.job_id === Number(jobId));
-      terminal = terminal.filter((a) => a.job_id === Number(jobId));
-    }
-    return json({ columns: STAGES, items: items.map(enrich), terminal: terminal.map(enrich) });
+
+  if (p === "/api/pipeline") return pipeline(s, u, Number(qp("jobId") || 0));
+
+  const appMatch = m(/^\/api\/applications\/(\d+)\/(move|interview|offer|bgv)$/);
+  if (appMatch && method === "POST") return applicationAction(s, u, Number(appMatch[1]), appMatch[2], body);
+
+  if (p === "/api/privacy/retention") {
+    if (u.role !== "ta_head") fail(403, "Limited to Head of TA");
+    const t = today();
+    return s.candidates
+      .filter((c) => !c.erased_at && c.retention_until <= t)
+      .map((c) => ({
+        id: c.id, name: c.name, email: c.email, created_at: c.created_at, retention_until: c.retention_until,
+        active_apps: s.applications.filter((a) => a.candidate_id === c.id && a.outcome === "active").length,
+      }));
   }
-  if (p.match(/^\/api\/applications\/\d+\/move$/) && method === "POST") {
-    const id = Number(p.split("/")[3]);
-    const app = s.applications.find((a) => a.id === id);
-    if (!app) return json({ error: "Not found" }, 404);
-    if (body.outcome === "rejected" || body.outcome === "dropped_out") {
-      Object.assign(app, body);
-    }
-    if (body.to_stage) {
-      s.history.unshift({
-        id: ++s.ids.hist,
-        application_id: id,
-        from_stage: app.stage,
-        to_stage: body.to_stage,
-        outcome: body.to_stage === "joined" ? "joined" : "active",
-        moved_by_name: u.name,
-        moved_at: now(),
-        note: body.note,
-      });
-      app.stage = body.to_stage;
-      app.outcome = body.to_stage === "joined" ? "joined" : "active";
-    }
-    return json({ ok: true });
-  }
-  if (p.match(/^\/api\/applications\/\d+\/interview$/) && method === "POST") {
-    const id = Number(p.split("/")[3]);
-    const app = s.applications.find((a) => a.id === id);
-    const j = s.jobs.find((job) => job.id === app?.job_id);
-    s.interviews.unshift({ id: ++s.ids.interview, application_id: id, job_id: app?.job_id, job_title: j?.title, ...body });
-    return json({ id: s.ids.interview }, 201);
-  }
-  if (p.match(/^\/api\/applications\/\d+\/offer$/) && method === "POST") {
-    const id = Number(p.split("/")[3]);
-    const app = s.applications.find((a) => a.id === id);
-    s.offers.unshift({ id: ++s.ids.offer, application_id: id, ...body });
-    if (app) {
-      app.stage = "offered";
-      app.offered_ctc_lpa = body.offered_ctc_lpa;
-      app.joining_date = body.joining_date;
-    }
-    return json({ id: s.ids.offer }, 201);
+  if (m(/^\/api\/privacy\/erase\/\d+$/) && method === "POST") {
+    if (u.role !== "ta_head") fail(403, "Limited to Head of TA");
+    const id = Number(p.split("/").pop());
+    if (!erase(s, id)) fail(404, "Not found");
+    audit(s, u, "erase", "candidate", id, { reason: body.reason || "retention expired" });
+    return { ok: true };
   }
   if (p === "/api/audit") {
-    if (u.role !== "ta_head") return json({ error: "Audit log is limited to Head of TA" }, 403);
-    return json(s.audit.slice(0, 200));
+    if (u.role !== "ta_head") fail(403, "Audit log is limited to Head of TA");
+    return s.audit.slice(0, 200);
   }
-  if (options.body instanceof FormData) return json({ filename: "demo-resume.pdf", original: "resume.pdf" });
-  return json({ error: "Not found in demo" }, 404);
+  fail(404, "Not found in demo");
+}
+
+function dashboard(s) {
+  const t = today();
+  const active = s.applications.filter((a) => a.outcome === "active");
+  const offeredIds = new Set(s.stage_history.filter((h) => h.to_stage === "offered").map((h) => h.application_id));
+  const cohort = s.applications.filter(
+    (a) => ["offered", "bgv", "joined"].includes(a.stage) || a.outcome === "joined" || offeredIds.has(a.id)
+  );
+  const oc = {
+    offered: cohort.length,
+    joined: cohort.filter((a) => a.outcome === "joined").length,
+    dropped: cohort.filter((a) => a.outcome === "dropped_out").length,
+    pending: cohort.filter((a) => a.outcome === "active").length,
+  };
+  const decided = oc.joined + oc.dropped;
+  oc.dropRatePct = decided ? Math.round((oc.dropped / decided) * 100) : null;
+
+  const groups = {};
+  for (const a of s.applications) {
+    const c = byId(s.candidates, a.candidate_id);
+    if (!c) continue;
+    const cons = c.consultancy_id ? byId(s.consultancies, c.consultancy_id) : null;
+    const key = c.source_type === "consultancy" ? `consultancy: ${cons?.name || "other"}` : c.source_type;
+    const g = (groups[key] ||= { source: key, applications: 0, client_round_plus: 0, joined: 0, dropped: 0, fee_inr: 0 });
+    g.applications++;
+    if (["client_round", "offered", "bgv", "joined"].includes(a.stage)) g.client_round_plus++;
+    if (a.outcome === "joined") {
+      g.joined++;
+      if (c.source_type === "consultancy") g.fee_inr += ((a.offered_ctc_lpa || 0) * 100000 * (cons?.fee_percent || 8.33)) / 100;
+    }
+    if (a.outcome === "dropped_out") g.dropped++;
+  }
+  const sourceRows = Object.values(groups)
+    .map((g) => ({ ...g, joinRatePct: g.applications ? Math.round((g.joined / g.applications) * 100) : 0 }))
+    .sort((a, b) => b.applications - a.applications);
+
+  const atRisk = active
+    .map((a) => {
+      const c = byId(s.candidates, a.candidate_id);
+      return { id: a.id, candidate_id: c.id, name: c.name, job_title: byId(s.jobs, a.job_id)?.title, stage: a.stage, risk: offerRisk(a, c, notesText(s, c.id)) };
+    })
+    .filter((r) => r.risk && r.risk.level !== "low")
+    .sort((x, y) => y.risk.score - x.risk.score);
+
+  const upcoming = s.interviews
+    .filter((i) => i.scheduled_at.slice(0, 10) >= t && i.scheduled_at.slice(0, 10) <= addDays(t, 7))
+    .map((i) => {
+      const a = byId(s.applications, i.application_id);
+      return { ...i, name: byId(s.candidates, a?.candidate_id)?.name, job_title: byId(s.jobs, a?.job_id)?.title, candidate_id: a?.candidate_id };
+    });
+
+  const joinedApps = s.applications.filter((a) => a.outcome === "joined" && a.joining_date);
+  const fillDays = joinedApps.map((a) => daysBetween(byId(s.jobs, a.job_id).created_at, a.joining_date));
+  const timeToFill = s.jobs
+    .filter((j) => j.status === "open" || j.status === "filled")
+    .map((j) => {
+      const ja = joinedApps.find((a) => a.job_id === j.id);
+      return {
+        id: j.id, title: j.title, created_at: j.created_at, target_closure_date: j.target_closure_date,
+        joining_date: ja?.joining_date || null, days_open: daysBetween(j.created_at, ja?.joining_date || t),
+      };
+    });
+
+  return {
+    offerCohort: oc,
+    sourceRows,
+    atRisk,
+    upcoming,
+    kpis: {
+      openJobs: s.jobs.filter((j) => j.status === "open").length,
+      activeApps: active.length,
+      offered: active.filter((a) => a.stage === "offered" || a.stage === "bgv").length,
+      joined30: joinedApps.filter((a) => a.joining_date >= addDays(t, -30)).length,
+      dropped: s.applications.filter((a) => a.outcome === "dropped_out").length,
+      rejected: s.applications.filter((a) => a.outcome === "rejected").length,
+      avgTimeToFillDays: fillDays.length ? Math.round(fillDays.reduce((x, y) => x + y, 0) / fillDays.length) : null,
+    },
+    byStage: STAGES.map((stage) => ({ stage, label: STAGE_LABELS[stage], count: active.filter((a) => a.stage === stage).length })),
+    timeToFill,
+  };
+}
+
+function candidateDetail(s, u, id) {
+  const c = byId(s.candidates, id);
+  if (!c) fail(404, "Not found");
+  let apps = s.applications.filter((a) => a.candidate_id === c.id);
+  if (isHM(u)) {
+    const vis = new Set(hmVisibleApps(s, u).map((a) => a.id));
+    apps = apps.filter((a) => vis.has(a.id));
+    if (!apps.length) fail(403, "Hiring managers can only open shortlisted candidates for their own roles");
+  }
+  const text = notesText(s, c.id);
+  const appIds = new Set(apps.map((a) => a.id));
+  const jobTitleFor = (appId) => byId(s.jobs, byId(s.applications, appId)?.job_id)?.title;
+  audit(s, u, "read", "candidate", c.id, { name: c.name });
+  return {
+    candidate: mask(u, { ...c, consultancy_name: c.consultancy_id ? byId(s.consultancies, c.consultancy_id)?.name : null }),
+    notes: s.notes
+      .filter((n) => n.candidate_id === c.id)
+      .map((n) => ({ ...n, author_name: byId(s.users, n.author_id)?.name }))
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))),
+    forms: isHM(u) ? [] : s.application_forms.filter((f) => appIds.has(f.application_id)),
+    applications: apps.map((a) => {
+      const v = jobView(s, byId(s.jobs, a.job_id));
+      const row = {
+        ...a, job_title: v.title, location: v.location, target_closure_date: v.target_closure_date,
+        client_name: v.client_name, project_name: v.project_name, project_start: v.project_start,
+        billing_rate_inr: v.billing_rate_inr,
+      };
+      return {
+        ...(isHM(u) ? { ...row, offered_ctc_lpa: null } : row),
+        notice_risk: noticeRisk(c.notice_period_days, v.project_start),
+        offer_risk: offerRisk(a, c, text),
+      };
+    }),
+    history: s.stage_history
+      .filter((h) => appIds.has(h.application_id))
+      .map((h) => ({ ...h, moved_by_name: byId(s.users, h.moved_by)?.name }))
+      .sort((a, b) => String(b.moved_at).localeCompare(String(a.moved_at))),
+    interviews: s.interviews.filter((i) => appIds.has(i.application_id)).map((i) => ({ ...i, job_title: jobTitleFor(i.application_id) })),
+    offers: s.offers
+      .filter((o) => appIds.has(o.application_id))
+      .map((o) => ({ ...o, offered_ctc_lpa: canSeeComp(u) ? o.offered_ctc_lpa : null, job_title: jobTitleFor(o.application_id) })),
+  };
+}
+
+function pipeline(s, u, jobId) {
+  let items = isHM(u) ? hmVisibleApps(s, u) : s.applications.filter((a) => a.outcome === "active" || a.outcome === "joined");
+  let terminal = isHM(u) ? [] : s.applications.filter((a) => a.outcome === "rejected" || a.outcome === "dropped_out");
+  if (jobId) {
+    items = items.filter((a) => a.job_id === jobId);
+    terminal = terminal.filter((a) => a.job_id === jobId);
+  }
+  const enrich = (a) => {
+    const c = byId(s.candidates, a.candidate_id);
+    const v = jobView(s, byId(s.jobs, a.job_id));
+    const row = mask(u, {
+      ...a, name: c.name, phone: c.phone, email: c.email, notice_period_days: c.notice_period_days,
+      total_experience_years: c.total_experience_years, skills: c.skills, source_type: c.source_type,
+      expected_ctc_lpa: c.expected_ctc_lpa, current_ctc_lpa: c.current_ctc_lpa, holds_other_offers: c.holds_other_offers,
+      job_title: v.title, location: v.location, client_name: v.client_name, project_name: v.project_name,
+      project_start: v.project_start, billing_rate_inr: v.billing_rate_inr, target_closure_date: v.target_closure_date,
+    });
+    return { ...row, notice_risk: noticeRisk(c.notice_period_days, v.project_start), offer_risk: offerRisk(a, c, notesText(s, c.id)) };
+  };
+  return { columns: isHM(u) ? HM_STAGES : STAGES, items: items.map(enrich), terminal: terminal.map(enrich) };
+}
+
+function applicationAction(s, u, appId, action, body) {
+  const a = byId(s.applications, appId);
+  if (!a) fail(404, "Application not found");
+  if (isHM(u)) fail(403, "Hiring managers can review and add notes, but recruiters update the pipeline");
+
+  if (action === "move") {
+    const { to_stage, outcome } = body;
+    if (outcome === "rejected" || outcome === "dropped_out") {
+      Object.assign(a, {
+        outcome, reject_reason_code: body.reject_reason_code || null, reject_notes: body.reject_notes || null,
+        dropout_reason: body.dropout_reason || null, updated_at: nowTs(),
+      });
+      history(s, a.id, a.stage, a.stage, outcome, u, body.reject_notes || body.dropout_reason || outcome);
+      return { ok: true };
+    }
+    if (outcome === "active" && a.outcome !== "active") {
+      Object.assign(a, { outcome: "active", reject_reason_code: null, reject_notes: null, dropout_reason: null });
+    }
+    if (to_stage) {
+      if (!STAGES.includes(to_stage)) fail(400, "Invalid stage");
+      const from = STAGES.indexOf(a.stage);
+      const to = STAGES.indexOf(to_stage);
+      if (to > from + 1) {
+        fail(400, `Move one stage at a time — next is ${STAGE_LABELS[STAGES[from + 1]]}. Client round and BGV cannot be skipped.`);
+      }
+      if (to_stage === "joined" && a.bgv_status !== "clear") {
+        fail(400, "Background verification must be marked Clear before the candidate can be marked Joined.");
+      }
+      const next = to_stage === "joined" ? "joined" : "active";
+      history(s, a.id, a.stage, to_stage, next, u, body.note);
+      Object.assign(a, { stage: to_stage, outcome: next, updated_at: nowTs() });
+      if (to_stage === "joined" && !a.joining_date) a.joining_date = today();
+      audit(s, u, "stage_move", "application", a.id, { to: to_stage });
+    }
+    return { ok: true };
+  }
+  if (action === "interview") {
+    const id = ++s.ids.interviews;
+    s.interviews.push({
+      id, application_id: a.id, round_type: body.round_type, panel_names: body.panel_names,
+      scheduled_at: body.scheduled_at, location_or_link: body.location_or_link || null, created_by: u.id, created_at: nowTs(),
+    });
+    return { id };
+  }
+  if (action === "offer") {
+    if (!["client_round", "offered", "bgv"].includes(a.stage)) {
+      fail(400, "An offer can only be made after the client round (client approval is required).");
+    }
+    const id = ++s.ids.offers;
+    s.offers.push({
+      id, application_id: a.id, offered_ctc_lpa: body.offered_ctc_lpa, joining_date: body.joining_date,
+      status: body.status || "pending", created_by: u.id, created_at: nowTs(),
+    });
+    const declined = body.status === "declined";
+    const nextStage = a.stage === "bgv" ? "bgv" : "offered";
+    history(s, a.id, a.stage, nextStage, declined ? "dropped_out" : "active", u, `Offer ${body.offered_ctc_lpa} LPA, join ${body.joining_date}`);
+    Object.assign(a, {
+      offered_ctc_lpa: body.offered_ctc_lpa, joining_date: body.joining_date, offer_status: body.status || "pending",
+      stage: nextStage, outcome: declined ? "dropped_out" : "active", dropout_reason: declined ? "Declined our offer" : null,
+      updated_at: nowTs(),
+    });
+    return { id };
+  }
+  if (!["not_started", "in_progress", "clear", "discrepancy"].includes(body.bgv_status)) fail(400, "Invalid BGV status");
+  a.bgv_status = body.bgv_status;
+  return { ok: true };
 }

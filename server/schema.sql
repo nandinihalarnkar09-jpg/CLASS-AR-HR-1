@@ -44,6 +44,10 @@ CREATE TABLE IF NOT EXISTS jobs (
   ctc_max_lpa REAL NOT NULL,
   location TEXT NOT NULL,
   target_closure_date TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  requirements TEXT NOT NULL DEFAULT '',
+  pay TEXT NOT NULL DEFAULT '',
+  benefits TEXT NOT NULL DEFAULT '',
   recruiter_id INTEGER REFERENCES users(id),
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'on_hold', 'closed', 'filled')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -163,3 +167,13 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
 CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_logs(entity_type, entity_id);
+
+CREATE TABLE IF NOT EXISTS application_forms (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+  answers_json TEXT NOT NULL,
+  cv_filename TEXT,
+  cover_letter_filename TEXT,
+  other_docs TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

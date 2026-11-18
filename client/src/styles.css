@@ -242,3 +242,24 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 12px; 
   .login-shell { grid-template-columns: 1fr; }
   .login-hero { padding: 32px 24px; min-height: 220px; }
 }
+
+.table-wrap { overflow-x: auto; }
+.kpi.highlight { border-color: var(--brass); background: #fbf3e4; }
+.card h3 { font-size: 16px; margin: 0 0 8px; }
+.banner { background: #fbf3e4; border-bottom: 1px solid var(--line); padding: 8px 16px; font-size: 12px; color: var(--muted); }
+
+@media (max-width: 1200px) {
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; padding: 14px 16px; gap: 12px; }
+  .nav { display: flex; flex-wrap: wrap; gap: 4px; }
+  .nav a { margin: 0; padding: 8px 10px; }
+  .user-switch { margin-top: 0; }
+  .main { padding: 18px 14px 40px; }
+  .grid-2, .split, .form-grid { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dpdp-chip { display: none; }
+  .kanban { grid-template-columns: repeat(7, 78vw); }
+}

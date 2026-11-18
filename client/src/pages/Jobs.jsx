@@ -7,6 +7,10 @@ const empty = {
   client_id: "",
   project_id: "",
   skills_required: "",
+  description: "",
+  requirements: "",
+  pay: "",
+  benefits: "",
   exp_min_years: 3,
   exp_max_years: 7,
   ctc_min_lpa: 12,
@@ -15,6 +19,8 @@ const empty = {
   target_closure_date: "",
   recruiter_id: "",
   status: "open",
+  openings: 1,
+  hiring_manager_id: "",
 };
 
 export default function Jobs({ meta }) {
@@ -31,7 +37,7 @@ export default function Jobs({ meta }) {
 
   async function save(e) {
     e.preventDefault();
-    const body = { ...edit, client_id: Number(edit.client_id), project_id: Number(edit.project_id), recruiter_id: Number(edit.recruiter_id) };
+    const body = { ...edit, client_id: Number(edit.client_id), project_id: Number(edit.project_id), recruiter_id: Number(edit.recruiter_id), hiring_manager_id: edit.hiring_manager_id ? Number(edit.hiring_manager_id) : null, openings: Number(edit.openings || 1) };
     if (edit.id) await api.updateJob(edit.id, body);
     else await api.createJob(body);
     setEdit(null);
@@ -45,7 +51,7 @@ export default function Jobs({ meta }) {
         title="Client-tied open positions"
         actions={canEdit && <button className="btn" onClick={() => setEdit({ ...empty, recruiter_id: meta.user.id, client_id: meta.clients[0].id, project_id: meta.projects[0].id })}>New requisition</button>}
       />
-      <div className="card">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
@@ -65,12 +71,13 @@ export default function Jobs({ meta }) {
                 <td>
                   <strong>{j.title}</strong>
                   <div className="meta">{j.skills_required}</div>
+                  {j.description && <div className="meta" style={{ marginTop: 6 }}>{j.description.slice(0, 140)}…</div>}
                 </td>
                 <td>
                   {j.client_name}
                   <div className="meta">{j.project_name} · start {j.project_start}</div>
                 </td>
-                <td>₹{(j.billing_rate_inr / 1000).toFixed(0)}k / mo</td>
+                <td>{j.billing_rate_inr ? `₹${(j.billing_rate_inr / 1000).toFixed(0)}k / mo` : "Bench"}<div className="meta">{j.openings || 1} opening{(j.openings || 1) > 1 ? "s" : ""}</div></td>
                 <td>
                   {j.exp_min_years}–{j.exp_max_years} yrs
                   <div className="meta">{j.ctc_min_lpa}–{j.ctc_max_lpa} LPA</div>
@@ -100,6 +107,18 @@ export default function Jobs({ meta }) {
                 {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </label>
+            <label className="field full">Job description
+              <textarea rows={4} value={edit.description || ""} onChange={(e) => setEdit({ ...edit, description: e.target.value })} required />
+            </label>
+            <label className="field full">Requirements (one per line)
+              <textarea rows={5} value={edit.requirements || ""} onChange={(e) => setEdit({ ...edit, requirements: e.target.value })} required />
+            </label>
+            <label className="field full">Pay (CTC, variable, bonuses)
+              <textarea rows={2} value={edit.pay || ""} onChange={(e) => setEdit({ ...edit, pay: e.target.value })} />
+            </label>
+            <label className="field full">Benefits (one per line)
+              <textarea rows={4} value={edit.benefits || ""} onChange={(e) => setEdit({ ...edit, benefits: e.target.value })} />
+            </label>
             <label className="field full">Skills required
               <input value={edit.skills_required} onChange={(e) => setEdit({ ...edit, skills_required: e.target.value })} required />
             </label>
@@ -127,6 +146,17 @@ export default function Jobs({ meta }) {
                   <option key={u.id} value={u.id}>{u.name}</option>
                 ))}
               </select>
+            </label>
+            <label className="field">Hiring manager (reviews shortlist)
+              <select value={edit.hiring_manager_id || ""} onChange={(e) => setEdit({ ...edit, hiring_manager_id: e.target.value })}>
+                <option value="">—</option>
+                {meta.users.filter((u) => u.role === "hiring_manager").map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field">Openings
+              <input type="number" min="1" value={edit.openings || 1} onChange={(e) => setEdit({ ...edit, openings: Number(e.target.value) })} />
             </label>
             <label className="field">Status
               <select value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>

@@ -1,6 +1,6 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api, getSession, clearSession, isDemoMode } from "./api";
+import { api, getSession, clearSession, isDemoMode, resetDemo } from "./api";
 import Dashboard from "./pages/Dashboard.jsx";
 import Jobs from "./pages/Jobs.jsx";
 import Pipeline from "./pages/Pipeline.jsx";
@@ -67,6 +67,7 @@ export default function App() {
     );
   }
   if (!meta) return <div className="main">Loading Meridian ATS…</div>;
+  const isHM = meta.user.role === "hiring_manager";
 
   return (
     <div className="app">
@@ -77,27 +78,42 @@ export default function App() {
           <small>Talent · DPDP v1{isDemoMode() ? " · browser demo" : ""}</small>
         </div>
         <nav className="nav">
-          <NavLink to="/">Dashboard</NavLink>
-          <NavLink to="/jobs">Requisitions</NavLink>
-          <NavLink to="/pipeline">Pipeline</NavLink>
+          {!isHM && <NavLink to="/" end>Dashboard</NavLink>}
+          <NavLink to="/jobs">{isHM ? "My roles" : "Requisitions"}</NavLink>
+          <NavLink to={isHM ? "/" : "/pipeline"} end={isHM}>{isHM ? "My shortlist" : "Pipeline"}</NavLink>
           <NavLink to="/candidates">Candidates</NavLink>
-          {meta.user.role === "ta_head" && <NavLink to="/audit">Audit log</NavLink>}
+          {meta.user.role === "ta_head" && <NavLink to="/audit">Privacy & audit</NavLink>}
         </nav>
         <div className="user-switch">
           <label>Signed in as</label>
           <div style={{ marginTop: 8, color: "#eadfce" }}>{meta.user.name}</div>
           <div className="meta" style={{ color: "#cbbfae" }}>{meta.user.role.replace("_", " ")}</div>
-          <button className="btn secondary" style={{ marginTop: 12, width: "100%" }} onClick={logout}>Log out</button>
+          <button className="btn secondary" style={{ marginTop: 12, width: "100%", color: "#eadfce" }} onClick={logout}>Log out</button>
+          {isDemoMode() && (
+            <button
+              className="btn ghost small"
+              style={{ marginTop: 8, color: "#cbbfae" }}
+              onClick={() => {
+                if (window.confirm("Reset all demo data in this browser back to the starting sample?")) {
+                  resetDemo();
+                  logout();
+                }
+              }}
+            >
+              Reset demo data
+            </button>
+          )}
         </div>
       </aside>
       <main className="main">
         <Routes>
-          <Route path="/" element={<Dashboard meta={meta} />} />
+          <Route path="/" element={isHM ? <Pipeline meta={meta} /> : <Dashboard meta={meta} />} />
           <Route path="/jobs" element={<Jobs meta={meta} />} />
           <Route path="/pipeline" element={<Pipeline meta={meta} />} />
           <Route path="/candidates" element={<Candidates meta={meta} />} />
           <Route path="/candidates/:id" element={<CandidateDetail meta={meta} />} />
           <Route path="/audit" element={<Audit />} />
+          <Route path="*" element={isHM ? <Pipeline meta={meta} /> : <Dashboard meta={meta} />} />
         </Routes>
       </main>
     </div>

@@ -58,6 +58,7 @@ export default function CandidateDetail({ meta }) {
         <div>
           <div className="card">
             <p className="meta">{c.phone} · {c.email}</p>
+            {c.holds_other_offers ? <span className="tag high">Holds other offers</span> : null}
             <p>{c.current_company || "—"} · {c.total_experience_years} yrs · {c.notice_period_days} days notice</p>
             <p>Skills: {c.skills}</p>
             <p>
@@ -95,9 +96,9 @@ export default function CandidateDetail({ meta }) {
                 <button className="btn small" type="submit">Link</button>
               </form>
             )}
-            <table>
+            <div className="table-wrap"><table>
               <thead>
-                <tr><th>Job</th><th>Stage</th><th>Outcome</th><th>Notice risk</th><th>Offer</th></tr>
+                <tr><th>Job</th><th>Stage</th><th>Outcome</th><th>Notice risk</th><th>Offer</th><th>Drop risk</th></tr>
               </thead>
               <tbody>
                 {pack.applications.map((a) => (
@@ -109,12 +110,33 @@ export default function CandidateDetail({ meta }) {
                       <span className={`tag ${a.notice_risk.level}`}>{a.notice_risk.level}</span>
                       <div className="meta">Project start {a.project_start}</div>
                     </td>
-                    <td>{a.offered_ctc_lpa ? `${a.offered_ctc_lpa} LPA · ${a.joining_date}` : "—"}</td>
+                    <td>{a.offered_ctc_lpa ? `${a.offered_ctc_lpa} LPA · ${a.joining_date}` : a.joining_date ? `Join ${a.joining_date}` : "—"}</td>
+                    <td>{a.offer_risk ? <><span className={`tag ${a.offer_risk.level}`}>{a.offer_risk.level}</span><div className="meta">{a.offer_risk.reasons.join(" · ")}</div></> : "—"}</td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </div>
+
+          {pack.forms?.length > 0 && (
+            <div className="card" style={{ marginTop: 16 }}>
+              <h2>Application form (from candidate portal)</h2>
+              {pack.forms.map((f) => {
+                let answers = {};
+                try { answers = JSON.parse(f.answers_json); } catch { /* ignore */ }
+                return (
+                  <table key={f.id} style={{ marginBottom: 12 }}>
+                    <tbody>
+                      {Object.entries(answers).filter(([k]) => k !== "consent").map(([k, v]) => (
+                        <tr key={k}><th style={{ width: "40%" }}>{k.replace(/_/g, " ")}</th><td>{String(v)}</td></tr>
+                      ))}
+                      <tr><th>Documents</th><td>{[f.cv_filename && "CV", f.cover_letter_filename && "Cover letter", f.other_docs && "Other documents"].filter(Boolean).join(", ") || "—"}</td></tr>
+                    </tbody>
+                  </table>
+                );
+              })}
+            </div>
+          )}
 
           <div className="card" style={{ marginTop: 16 }}>
             <h2>Interviews</h2>
