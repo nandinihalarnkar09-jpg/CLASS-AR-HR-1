@@ -85,6 +85,15 @@ export default function CandidatePortal({ session, onLogout }) {
         </table>
       </div>
       <div className="card" style={{ marginTop: 16 }}>
+        <h2>Your data (DPDP)</h2>
+        <p className="meta">Meridian keeps your data only for recruitment, for up to 3 years. You can withdraw consent and erase your personal data at any time.</p>
+        <button className="btn danger small" onClick={async () => {
+          if (!window.confirm("Withdraw consent and erase your personal data? Your applications will be closed. This cannot be undone.")) return;
+          await api.portalErase();
+          onLogout();
+        }}>Withdraw consent & erase my data</button>
+      </div>
+      <div className="card" style={{ marginTop: 16 }}>
         <h2>Open jobs — apply to as many as you like</h2>
         <p className="meta">Fill the application form, attach a PDF CV, and optionally a cover letter or other documents.</p>
         {jobs.map((j) => (

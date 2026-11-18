@@ -1,43 +1,37 @@
-name: Deploy GitHub Pages demo
+name: Deploy live site (GitHub Pages)
 
 on:
   push:
-    branches: [main, cursor/meridian-ats-mvp-798e]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
+      - run: npm ci
       - run: npm ci --prefix client
-      - run: npm run build
-        working-directory: client
+      - run: npm test
+      - name: Build browser-only live site
+        run: node scripts/export-demo-seed.js && npm run build --prefix client
         env:
+          VITE_DEMO: "1"
           VITE_BASE: /CLASS-AR-HR-1/
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - run: cp client/dist/index.html client/dist/404.html && touch client/dist/.nojekyll
+      - name: Publish to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: client/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: client/dist
+          force_orphan: true

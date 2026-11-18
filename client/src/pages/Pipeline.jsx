@@ -9,7 +9,9 @@ export default function Pipeline({ meta }) {
   const [data, setData] = useState(null);
   const [active, setActive] = useState(null);
   const [mode, setMode] = useState(null);
+  const [err, setErr] = useState("");
   const nav = useNavigate();
+  const readOnly = meta.user.role === "hiring_manager";
 
   function load(id = jobId) {
     api.pipeline(id).then(setData);
@@ -19,27 +21,28 @@ export default function Pipeline({ meta }) {
     load("");
   }, []);
 
-  async function move(to) {
-    await api.move(active.id, { to_stage: to });
-    setMode(null);
-    setActive(null);
-    load();
+  async function run(fn) {
+    setErr("");
+    try {
+      await fn();
+      setMode(null);
+      setActive(null);
+      load();
+    } catch (e) {
+      setErr(e.message);
+    }
   }
-
-  async function terminal(outcome, extra) {
-    await api.move(active.id, { outcome, ...extra });
-    setMode(null);
-    setActive(null);
-    load();
-  }
+  const move = (to) => run(() => api.move(active.id, { to_stage: to }));
+  const terminal = (outcome, extra) => run(() => api.move(active.id, { outcome, ...extra }));
+  const setBgv = (status) => run(() => api.bgv(active.id, status));
 
   const idx = (s) => meta.stages.indexOf(s);
 
   return (
     <div>
       <PageHead
-        eyebrow="Kanban pipeline"
-        title="Applied → Joined (client round & BGV required)"
+        eyebrow={readOnly ? "Your shortlist" : "Kanban pipeline"}
+        title={readOnly ? "Candidates shortlisted for your roles" : "Applied → Joined (client round & BGV required)"}
         actions={
           <select
             style={{ width: 280 }}
@@ -49,7 +52,7 @@ export default function Pipeline({ meta }) {
               api.pipeline(e.target.value).then(setData);
             }}
           >
-            <option value="">All open requisitions</option>
+            <option value="">{readOnly ? "All my roles" : "All open requisitions"}</option>
             {jobs.map((j) => (
               <option key={j.id} value={j.id}>{j.title} · {j.client_name}</option>
             ))}
@@ -76,6 +79,8 @@ export default function Pipeline({ meta }) {
                       <div className="meta">{item.client_name} · {item.notice_period_days}d notice</div>
                       {item.notice_risk?.level === "high" && <span className="tag high">Notice vs project start</span>}
                       {item.notice_risk?.level === "medium" && <span className="tag medium">Tight notice</span>}
+                      {item.offer_risk && item.offer_risk.level !== "low" && <span className={`tag ${item.offer_risk.level}`}>Drop risk: {item.offer_risk.level}</span>}
+                      {item.stage === "bgv" && <span className={`tag ${item.bgv_status === "clear" ? "ok" : "medium"}`}>BGV {String(item.bgv_status || "not_started").replace("_", " ")}</span>}
                       <span className="tag">{item.source_type}</span>
                     </div>
                   ))}
@@ -104,13 +109,32 @@ export default function Pipeline({ meta }) {
       )}
 
       {active && !mode && (
-        <Modal title={active.name} onClose={() => setActive(null)}>
+        <Modal title={active.name} onClose={() => { setActive(null); setErr(""); }}>
+          {err && <div className="alert danger">{err}</div>}
           <p className="meta">{active.job_title} · {active.client_name} · {meta.stageLabels[active.stage]}</p>
           {active.notice_risk?.level === "high" && (
             <div className="alert danger">
               {active.notice_period_days}-day notice vs project start in {active.notice_risk.untilStart} days. Likely unusable for this billing start.
             </div>
           )}
+          {active.offer_risk && active.offer_risk.level !== "low" && (
+            <div className="alert">Offer-drop risk {active.offer_risk.level}: {active.offer_risk.reasons.join(" · ")}</div>
+          )}
+          {!readOnly && active.stage === "bgv" && (
+            <div className="toolbar" style={{ marginTop: 12 }}>
+              <span className="meta">Background verification:</span>
+              {["not_started", "in_progress", "clear", "discrepancy"].map((s) => (
+                <button key={s} className={`btn small ${active.bgv_status === s ? "" : "secondary"}`} onClick={() => setBgv(s)}>
+                  {s.replace("_", " ")}
+                </button>
+              ))}
+            </div>
+          )}
+          {readOnly ? (
+            <div className="toolbar" style={{ marginTop: 12 }}>
+              <button className="btn small" onClick={() => nav(`/candidates/${active.candidate_id}`)}>Open record & add feedback</button>
+            </div>
+          ) : (
           <div className="toolbar" style={{ marginTop: 12 }}>
             <button className="btn small" disabled={idx(active.stage) === 0} onClick={() => move(meta.stages[idx(active.stage) - 1])}>Move back</button>
             <button className="btn small" disabled={idx(active.stage) === meta.stages.length - 1} onClick={() => move(meta.stages[idx(active.stage) + 1])}>Move forward</button>
@@ -121,16 +145,19 @@ export default function Pipeline({ meta }) {
             <button className="btn ghost small" onClick={() => nav(`/candidates/${active.candidate_id}`)}>Open record</button>
             <a className="btn ghost small" href={`mailto:${active.email}`}>Email candidate</a>
           </div>
+          )}
         </Modal>
       )}
 
       {active && mode === "reject" && (
         <Modal title="Reject candidate" onClose={() => setMode(null)}>
+          {err && <div className="alert danger">{err}</div>}
           <RejectForm reasons={meta.rejectReasons} onSubmit={(payload) => terminal("rejected", payload)} />
         </Modal>
       )}
       {active && mode === "drop" && (
         <Modal title="Mark dropped out" onClose={() => setMode(null)}>
+          {err && <div className="alert danger">{err}</div>}
           <form onSubmit={(e) => { e.preventDefault(); const fd = new FormData(e.target); terminal("dropped_out", { dropout_reason: fd.get("reason") }); }}>
             <label className="field">Reason (competing offer, delay, etc.)
               <textarea name="reason" required rows={3} />
@@ -141,25 +168,17 @@ export default function Pipeline({ meta }) {
       )}
       {active && mode === "interview" && (
         <Modal title="Schedule interview" onClose={() => setMode(null)}>
+          {err && <div className="alert danger">{err}</div>}
           <InterviewForm
-            onSubmit={async (body) => {
-              await api.scheduleInterview(active.id, body);
-              setMode(null);
-              setActive(null);
-              load();
-            }}
+            onSubmit={(body) => run(() => api.scheduleInterview(active.id, body))}
           />
         </Modal>
       )}
       {active && mode === "offer" && (
         <Modal title="Record offer" onClose={() => setMode(null)}>
+          {err && <div className="alert danger">{err}</div>}
           <OfferForm
-            onSubmit={async (body) => {
-              await api.saveOffer(active.id, body);
-              setMode(null);
-              setActive(null);
-              load();
-            }}
+            onSubmit={(body) => run(() => api.saveOffer(active.id, body))}
           />
         </Modal>
       )}

@@ -65,6 +65,8 @@ function applyJobDetails(db) {
   }
 }
 
+const D = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+
 function seed(db) {
   const count = db.prepare("SELECT COUNT(*) AS n FROM users").get().n;
   if (count > 0) {
@@ -95,12 +97,12 @@ function seed(db) {
   const insertProject = db.prepare(
     "INSERT INTO projects (client_id, name, start_date, billing_rate_inr) VALUES (?, ?, ?, ?)"
   );
-  insertProject.run(1, "Digital Lending Platform", "2026-09-15", 185000);
-  insertProject.run(1, "Core Banking Modernisation", "2026-10-01", 210000);
-  insertProject.run(2, "Connected Vehicle Analytics", "2026-09-01", 165000);
-  insertProject.run(3, "KYC Automation", "2026-11-01", 140000);
-  insertProject.run(4, "5G OSS Support", "2026-08-25", 175000);
-  insertProject.run(5, "Collections Transformation", "2026-10-20", 150000);
+  insertProject.run(1, "Digital Lending Platform", D(21), 185000);
+  insertProject.run(1, "Core Banking Modernisation", D(35), 210000);
+  insertProject.run(2, "Connected Vehicle Analytics", D(14), 165000);
+  insertProject.run(3, "KYC Automation", D(60), 140000);
+  insertProject.run(4, "5G OSS Support", D(10), 175000);
+  insertProject.run(5, "Collections Transformation", D(45), 150000);
 
   const insertCons = db.prepare(
     "INSERT INTO consultancies (name, fee_percent) VALUES (?, 8.33)"
@@ -120,7 +122,7 @@ function seed(db) {
   insertJob.run(
     "Java Full Stack Engineer",
     1, 1, "Java, Spring Boot, React, PostgreSQL",
-    4, 8, 18, 28, "Bengaluru", "2026-09-10", 2, "open",
+    4, 8, 18, 28, "Bengaluru", D(18), 2, "open",
     JOB_DETAILS["Java Full Stack Engineer"].description,
     JOB_DETAILS["Java Full Stack Engineer"].requirements,
     JOB_DETAILS["Java Full Stack Engineer"].pay,
@@ -129,7 +131,7 @@ function seed(db) {
   insertJob.run(
     "React Frontend Developer",
     1, 2, "React, TypeScript, Redux, Jest",
-    3, 6, 14, 22, "Hyderabad", "2026-09-20", 3, "open",
+    3, 6, 14, 22, "Pune", D(30), 3, "open",
     JOB_DETAILS["React Frontend Developer"].description,
     JOB_DETAILS["React Frontend Developer"].requirements,
     JOB_DETAILS["React Frontend Developer"].pay,
@@ -138,7 +140,7 @@ function seed(db) {
   insertJob.run(
     "Data Engineer",
     2, 3, "Python, Spark, Kafka, AWS",
-    5, 9, 20, 32, "Pune", "2026-08-28", 2, "open",
+    5, 9, 20, 32, "Pune", D(12), 2, "open",
     JOB_DETAILS["Data Engineer"].description,
     JOB_DETAILS["Data Engineer"].requirements,
     JOB_DETAILS["Data Engineer"].pay,
@@ -147,7 +149,7 @@ function seed(db) {
   insertJob.run(
     "QA Automation Lead",
     3, 4, "Selenium, Cypress, Java, API Testing",
-    6, 10, 16, 24, "Chennai", "2026-10-15", 4, "open",
+    6, 10, 16, 24, "Goa", D(50), 4, "open",
     JOB_DETAILS["QA Automation Lead"].description,
     JOB_DETAILS["QA Automation Lead"].requirements,
     JOB_DETAILS["QA Automation Lead"].pay,
@@ -156,7 +158,7 @@ function seed(db) {
   insertJob.run(
     "DevOps Engineer",
     4, 5, "Kubernetes, Terraform, Jenkins, AWS",
-    4, 7, 18, 26, "Mumbai", "2026-08-22", 5, "open",
+    4, 7, 18, 26, "Bengaluru", D(-3), 5, "open",
     JOB_DETAILS["DevOps Engineer"].description,
     JOB_DETAILS["DevOps Engineer"].requirements,
     JOB_DETAILS["DevOps Engineer"].pay,
@@ -165,7 +167,7 @@ function seed(db) {
   insertJob.run(
     "Business Analyst — Collections",
     5, 6, "BFSI, SQL, Jira, Stakeholder Mgmt",
-    5, 8, 15, 22, "Mumbai", "2026-10-01", 3, "open",
+    5, 8, 15, 22, "Pune", D(40), 3, "open",
     JOB_DETAILS["Business Analyst — Collections"].description,
     JOB_DETAILS["Business Analyst — Collections"].requirements,
     JOB_DETAILS["Business Analyst — Collections"].pay,
@@ -209,14 +211,14 @@ function seed(db) {
   const apps = [
     [1, 1, "client_round", "active", null, null],
     [2, 2, "internal_interview", "active", null, null],
-    [3, 3, "offered", "active", 28, "2026-10-15"],
-    [4, 1, "bgv", "active", 24, "2026-09-01"],
+    [3, 3, "offered", "active", 28, D(40)],
+    [4, 1, "bgv", "active", 24, D(20)],
     [5, 5, "screened", "active", null, null],
     [6, 2, "applied", "active", null, null],
     [7, 4, "client_round", "active", null, null],
     [8, 6, "screened", "active", null, null],
     [9, 1, "rejected", "rejected", null, null],
-    [10, 3, "joined", "joined", 18, "2026-08-01"],
+    [10, 3, "joined", "joined", 18, D(-20)],
     [11, 5, "dropped_out", "dropped_out", null, null],
     [12, 1, "applied", "active", null, null],
     [2, 1, "screened", "active", null, null],
@@ -244,18 +246,73 @@ function seed(db) {
 
   db.prepare(`
     INSERT INTO interviews (application_id, round_type, panel_names, scheduled_at, location_or_link, created_by)
-    VALUES (1, 'client', 'HDFC panel: Rakesh Iyer, Sunita Rao', '2026-08-21T15:00:00', 'Teams', 2)
-  `).run();
+    VALUES (1, 'client', 'HDFC panel: Rakesh Iyer, Sunita Rao', ?, 'Teams', 2)
+  `).run(D(2) + "T15:00");
 
   db.prepare(`
     INSERT INTO offers (application_id, offered_ctc_lpa, joining_date, status, created_by)
-    VALUES (3, 28, '2026-10-15', 'pending', 2)
-  `).run();
+    VALUES (3, 28, ?, 'pending', 2)
+  `).run(D(40));
   db.prepare(`
     INSERT INTO offers (application_id, offered_ctc_lpa, joining_date, status, created_by)
-    VALUES (4, 24, '2026-09-01', 'accepted', 2)
-  `).run();
+    VALUES (4, 24, ?, 'accepted', 2)
+  `).run(D(20));
   applyJobDetails(db);
+  seedHistory(db);
+}
+
+// Requisition ages, hiring-manager ownership, risk signals and 6 months of closed offers so the
+// dashboard can answer "how many do we lose between offer and joining?" with real numbers.
+function seedHistory(db) {
+  const ages = [45, 38, 52, 20, 60, 25];
+  ages.forEach((age, i) => {
+    db.prepare("UPDATE jobs SET created_at = ?, hiring_manager_id = ? WHERE id = ?").run(D(-age) + " 09:00:00", [6, 6, 7, 7, 8, 8][i], i + 1);
+  });
+  db.prepare("UPDATE jobs SET openings = 3 WHERE id = 1").run();
+  db.prepare("UPDATE candidates SET holds_other_offers = 1 WHERE id IN (3, 12)").run();
+  db.prepare("UPDATE applications SET bgv_status = 'in_progress' WHERE stage = 'bgv'").run();
+  db.prepare("UPDATE applications SET bgv_status = 'clear' WHERE outcome = 'joined'").run();
+
+  const job = db.prepare(`INSERT INTO jobs (title, client_id, project_id, skills_required, exp_min_years, exp_max_years,
+    ctc_min_lpa, ctc_max_lpa, location, target_closure_date, recruiter_id, status, created_at, openings, hiring_manager_id,
+    description) VALUES ('Java Developer (closed batch)', 1, 1, 'Java, Spring Boot', 3, 7, 12, 22, 'Pune', ?, 2, 'filled', ?, 10, 6,
+    'Historical batch hire for earlier client ramp-up.')`).run(D(-60), D(-180) + " 09:00:00").lastInsertRowid;
+
+  const people = [
+    ["Rakesh Pillai", "joined", "naukri", null], ["Sana Shaikh", "joined", "referral", null],
+    ["Gaurav Joshi", "dropped_out", "consultancy", 1], ["Neha Kapoor", "joined", "linkedin", null],
+    ["Arvind Swamy", "dropped_out", "naukri", null], ["Priyanka Das", "joined", "consultancy", 2],
+    ["Tarun Sethi", "dropped_out", "linkedin", null], ["Lakshmi Rao", "joined", "consultancy", 3],
+    ["Manish Tiwari", "joined", "direct", null],
+  ];
+  const reasons = ["Accepted competing offer", "Took counter-offer from current employer", "Current employer would not release early"];
+  let r = 0;
+  people.forEach(([name, outcome, src, cons], i) => {
+    const phone = "98765100" + String(10 + i);
+    const created = D(-170 + i * 4);
+    const cid = db.prepare(`INSERT INTO candidates (name, phone, email, current_company, current_ctc_lpa, expected_ctc_lpa,
+      notice_period_days, total_experience_years, skills, source_type, source_detail, consultancy_id, consent_given, consent_at,
+      retention_until, created_at) VALUES (?, ?, ?, 'Infosys', 12, 17, ?, 5, 'Java, Spring Boot', ?, ?, ?, 1, ?, ?, ?)`)
+      .run(name, phone, name.toLowerCase().replace(" ", ".") + "@example.com", outcome === "joined" ? 30 : 90, src,
+        src === "consultancy" ? "Consultancy submission" : "Sourced", cons, created, D(3 * 365 - 170 + i * 4), created).lastInsertRowid;
+    const ctc = 16 + (i % 4);
+    const aid = db.prepare(`INSERT INTO applications (candidate_id, job_id, stage, outcome, offered_ctc_lpa, joining_date,
+      offer_status, bgv_status, dropout_reason, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(cid, job, outcome === "joined" ? "joined" : "offered", outcome, ctc, D(-110 + i * 4),
+        outcome === "joined" ? "accepted" : "declined", outcome === "joined" ? "clear" : "not_started",
+        outcome === "joined" ? null : reasons[r++ % 3], created, D(-110 + i * 4)).lastInsertRowid;
+    const h = db.prepare("INSERT INTO stage_history (application_id, from_stage, to_stage, outcome, moved_by, moved_at, note) VALUES (?, ?, ?, ?, 2, ?, ?)");
+    h.run(aid, "client_round", "offered", "active", D(-140 + i * 4) + " 11:00:00", "Offer released");
+    if (outcome === "joined") h.run(aid, "bgv", "joined", "joined", D(-110 + i * 4) + " 10:00:00", "Joined");
+    else h.run(aid, "offered", "offered", "dropped_out", D(-115 + i * 4) + " 10:00:00", "Dropped after offer");
+  });
+
+  // Two records captured over 3 years ago: they appear in the DPDP retention queue.
+  ["Old Applicant One", "Old Applicant Two"].forEach((name, i) => {
+    db.prepare(`INSERT INTO candidates (name, phone, email, notice_period_days, total_experience_years, skills, source_type,
+      consent_given, consent_at, retention_until, created_at) VALUES (?, ?, ?, 30, 4, 'PHP', 'naukri', 1, ?, ?, ?)`)
+      .run(name, "98765200" + String(10 + i), `old${i + 1}@example.com`, D(-1180), D(-85 - i * 10), D(-1180));
+  });
 }
 
 if (require.main === module) {

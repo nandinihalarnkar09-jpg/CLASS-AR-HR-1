@@ -16,7 +16,8 @@ Designed for ~40 concurrent open positions, ~200 new candidates / month, and **3
 | `notes` | Free-text, author, timestamp. |
 | `interviews` | Panel names, time, internal vs client round. |
 | `offers` | Offered CTC and joining date. |
-| `audit_logs` | DPDP processing log (read/create/update/resume download). |
+| `audit_logs` | DPDP processing log (read/create/update/resume download/erase). |
+| `application_forms` | Candidate-portal answers and document names per application. |
 
 ## Application stage & outcome
 
@@ -36,6 +37,7 @@ Reject reason codes: skills_mismatch, ctc_mismatch, notice_too_long, client_reje
 - `retention_until` = capture date + 3 years.
 - Hiring managers cannot create/edit candidates or jobs; CTC masked in API.
 - Resume download and candidate reads are audited.
-- Candidate self-service (apply / status) is **not** in v1.
+- Candidate self-service portal: apply, see status, withdraw consent and erase own data.
+- Retention queue: Head of TA erases records past `retention_until` (personal fields removed, anonymous stats kept).
 
 SQL source of truth: [`server/schema.sql`](../server/schema.sql).

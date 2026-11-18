@@ -1,4 +1,9 @@
-import { demoRequest, demoActive, enableDemo } from "./demoStore";
+import { demoRequest, demoActive, enableDemo, resetDemo } from "./demoStore";
+
+// The GitHub Pages build has no server: it always uses the in-browser data store.
+if (import.meta.env.VITE_DEMO === "1") enableDemo();
+
+export { resetDemo };
 
 const SESSION_KEY = "meridian-ats-session";
 
@@ -116,4 +121,8 @@ export const api = {
     request(`/api/applications/${id}/interview`, { method: "POST", body: JSON.stringify(body) }),
   saveOffer: (id, body) => request(`/api/applications/${id}/offer`, { method: "POST", body: JSON.stringify(body) }),
   audit: () => request("/api/audit"),
+  bgv: (id, bgv_status) => request(`/api/applications/${id}/bgv`, { method: "POST", body: JSON.stringify({ bgv_status }) }),
+  retention: () => request("/api/privacy/retention"),
+  erase: (id, reason) => request(`/api/privacy/erase/${id}`, { method: "POST", body: JSON.stringify({ reason }) }),
+  portalErase: () => request("/api/portal/erase", { method: "POST", body: "{}" }),
 };
